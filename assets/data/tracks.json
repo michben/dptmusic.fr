@@ -1,0 +1,17 @@
+[
+  {
+    "id": "dpt-dpt",
+    "title": "DPT",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/dpt-dpt.jpg",
+    "mainLink": "https://ditto.fm/dpt-dpt",
+    "platforms": {
+      "spotify": "",
+      "appleMusic": "",
+      "youtube": "",
+      "deezer": ""
+    }
+  }
+]

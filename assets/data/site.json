@@ -1,0 +1,22 @@
+{
+  "_aide": "Paramètres généraux du site. Laissez une valeur vide (\"\") pour masquer l'élément correspondant. Voir README.md.",
+
+  "tagline": "",
+
+  "listenLink": "https://ditto.fm/dpt-dpt",
+
+  "email": "",
+
+  "formspreeId": "",
+
+  "socials": {
+    "spotify": "",
+    "appleMusic": "",
+    "youtube": "",
+    "deezer": "",
+    "instagram": "",
+    "tiktok": "",
+    "x": "",
+    "facebook": ""
+  }
+}

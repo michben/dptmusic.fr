@@ -1,0 +1,521 @@
+/* ==========================================================================
+   DPT — Espace admin
+   Modifie assets/data/tracks.json, assets/data/site.json et les pochettes
+   directement dans le dépôt GitHub, via l'API GitHub et un jeton personnel.
+   Chaque enregistrement crée un commit sur la branche publiée : GitHub Pages
+   met ensuite le site à jour tout seul.
+   ========================================================================== */
+
+(function () {
+  "use strict";
+
+  /* --- Réglages du dépôt ---------------------------------------------------- */
+  var CONFIG = {
+    owner: "michben",
+    repo: "dptmusic.fr",
+    branch: "main",
+    tracksPath: "assets/data/tracks.json",
+    sitePath: "assets/data/site.json",
+    coversDir: "assets/img/covers/",
+    coverSize: 800,      // pochettes enregistrées en 800 × 800 px
+    coverQuality: 0.82   // qualité JPEG
+  };
+
+  var TOKEN_KEY = "dpt-admin-token";
+  var PLATFORMS = ["spotify", "appleMusic", "youtube", "deezer"];
+  var SOCIALS = {
+    spotify: "Spotify",
+    appleMusic: "Apple Music",
+    youtube: "YouTube",
+    deezer: "Deezer",
+    instagram: "Instagram",
+    tiktok: "TikTok",
+    x: "X",
+    facebook: "Facebook"
+  };
+
+  var state = {
+    token: "",
+    tracks: [],
+    tracksSha: null,
+    site: {},
+    siteSha: null,
+    editingIndex: -1,  // -1 = nouvelle sortie
+    coverData: null,   // pochette choisie (data URL JPEG)
+    previews: {}       // id -> data URL, pour afficher une pochette avant la mise en ligne
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ---------------------------------------------------------------------- */
+  /* Jeton                                                                   */
+  /* ---------------------------------------------------------------------- */
+
+  function readToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || ""; }
+    catch (e) { return ""; }
+  }
+
+  function storeToken(token, remember) {
+    try {
+      clearToken();
+      (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+    } catch (e) { /* stockage indisponible : le jeton reste en mémoire */ }
+  }
+
+  function clearToken() {
+    try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); } catch (e) { /* rien */ }
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* API GitHub                                                              */
+  /* ---------------------------------------------------------------------- */
+
+  function api(path, options) {
+    options = options || {};
+    var headers = {
+      Accept: "application/vnd.github+json",
+      Authorization: "Bearer " + state.token,
+      "X-GitHub-Api-Version": "2022-11-28"
+    };
+    if (options.body) headers["Content-Type"] = "application/json";
+    return fetch("https://api.github.com/repos/" + CONFIG.owner + "/" + CONFIG.repo + path, {
+      method: options.method || "GET",
+      headers: headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      cache: "no-store"
+    }).then(function (res) {
+      if (res.status === 404 && options.allow404) return null;
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        if (!res.ok) {
+          var err = new Error(data.message || ("Erreur " + res.status));
+          err.status = res.status;
+          throw err;
+        }
+        return data;
+      });
+    });
+  }
+
+  function encodePath(path) { return path.split("/").map(encodeURIComponent).join("/"); }
+
+  function getFile(path, allow404) {
+    return api("/contents/" + encodePath(path) + "?ref=" + encodeURIComponent(CONFIG.branch), { allow404: allow404 });
+  }
+
+  function putFile(path, base64, sha, message) {
+    var body = { message: message, content: base64, branch: CONFIG.branch };
+    if (sha) body.sha = sha;
+    return api("/contents/" + encodePath(path), { method: "PUT", body: body });
+  }
+
+  function utf8ToBase64(text) {
+    var bytes = new TextEncoder().encode(text);
+    var bin = "";
+    for (var i = 0; i < bytes.length; i += 0x8000) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    }
+    return btoa(bin);
+  }
+
+  function base64ToUtf8(b64) {
+    var bin = atob(b64.replace(/\s/g, ""));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function readJSON(path) {
+    return getFile(path).then(function (file) {
+      return { data: JSON.parse(base64ToUtf8(file.content)), sha: file.sha };
+    });
+  }
+
+  function writeJSON(path, data, sha, message) {
+    return putFile(path, utf8ToBase64(JSON.stringify(data, null, 2) + "\n"), sha, message)
+      .then(function (res) { return res.content.sha; });
+  }
+
+  function explain(err) {
+    if (err.status === 401) return "Jeton refusé ou expiré. Déconnectez-vous et collez un nouveau jeton.";
+    if (err.status === 403) return "Ce jeton n’a pas le droit de modifier le dépôt (permission « Contents : Read and write » requise).";
+    if (err.status === 409 || err.status === 422) return "Le fichier a changé entre-temps. Rechargez la page puis recommencez.";
+    if (err instanceof SyntaxError) return "Un fichier de données contient une erreur de syntaxe : " + err.message;
+    return err.message || "Erreur inconnue.";
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Écrans                                                                  */
+  /* ---------------------------------------------------------------------- */
+
+  function show(view) {
+    $("loading").hidden = view !== "loading";
+    $("login-view").hidden = view !== "login";
+    $("app-view").hidden = view !== "app";
+    $("logout").hidden = view !== "app";
+  }
+
+  function flash(message, isError) {
+    var box = $("flash");
+    box.textContent = message;
+    box.classList.toggle("is-error", !!isError);
+    box.hidden = false;
+    box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function login(token) {
+    state.token = token;
+    show("loading");
+    return api("").then(function (repo) {
+      if (!repo.permissions || !repo.permissions.push) {
+        var e = new Error("no push"); e.status = 403; throw e;
+      }
+      return Promise.all([readJSON(CONFIG.tracksPath), readJSON(CONFIG.sitePath)]);
+    }).then(function (files) {
+      if (!Array.isArray(files[0].data)) throw new SyntaxError("tracks.json doit contenir une liste [ … ]");
+      state.tracks = files[0].data;
+      state.tracksSha = files[0].sha;
+      state.site = files[1].data || {};
+      state.siteSha = files[1].sha;
+      renderTracks();
+      fillSettings();
+      show("app");
+    });
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Liste des sorties                                                       */
+  /* ---------------------------------------------------------------------- */
+
+  function coverSrc(track) {
+    if (state.previews[track.id]) return state.previews[track.id];
+    return track.cover ? "../" + track.cover : "../assets/img/covers/placeholder.jpg";
+  }
+
+  function button(label, title, onClick, disabled, extraClass) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "icon-btn" + (extraClass ? " " + extraClass : "");
+    b.textContent = label;
+    b.title = title;
+    b.setAttribute("aria-label", title);
+    b.disabled = !!disabled;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function renderTracks() {
+    var list = $("track-list");
+    list.innerHTML = "";
+    if (!state.tracks.length) {
+      var empty = document.createElement("li");
+      empty.className = "empty-state";
+      empty.textContent = "Aucune sortie pour l’instant. Cliquez sur « Nouvelle sortie ».";
+      list.appendChild(empty);
+      return;
+    }
+    state.tracks.forEach(function (track, i) {
+      var li = document.createElement("li");
+      li.className = "admin-item";
+
+      var img = document.createElement("img");
+      img.src = coverSrc(track);
+      img.alt = "";
+      img.width = 64;
+      img.height = 64;
+      img.addEventListener("error", function () { img.src = "../assets/img/covers/placeholder.jpg"; }, { once: true });
+
+      var info = document.createElement("div");
+      info.className = "admin-item-info";
+      var title = document.createElement("strong");
+      title.textContent = track.title || "Sans titre";
+      var meta = document.createElement("span");
+      meta.textContent = [track.type, track.releaseDate].filter(Boolean).join(" · ");
+      info.appendChild(title);
+      info.appendChild(meta);
+
+      var name = track.title || "cette sortie";
+      var actions = document.createElement("div");
+      actions.className = "admin-item-actions";
+      actions.appendChild(button("↑", "Monter « " + name + " »", function () { move(i, -1); }, i === 0));
+      actions.appendChild(button("↓", "Descendre « " + name + " »", function () { move(i, 1); }, i === state.tracks.length - 1));
+      actions.appendChild(button("Modifier", "Modifier « " + name + " »", function () { openForm(i); }));
+      actions.appendChild(button("Supprimer", "Supprimer « " + name + " »", function () { remove(i); }, false, "danger"));
+
+      li.appendChild(img);
+      li.appendChild(info);
+      li.appendChild(actions);
+      list.appendChild(li);
+    });
+  }
+
+  function saveTracks(newTracks, message) {
+    return writeJSON(CONFIG.tracksPath, newTracks, state.tracksSha, message).then(function (sha) {
+      state.tracks = newTracks;
+      state.tracksSha = sha;
+      renderTracks();
+    });
+  }
+
+  function setBusy(busy) {
+    document.querySelectorAll("#app-view button, #track-form button").forEach(function (b) {
+      if (busy) { b.dataset.wasDisabled = b.disabled ? "1" : ""; b.disabled = true; }
+      else { b.disabled = b.dataset.wasDisabled === "1"; }
+    });
+  }
+
+  function move(index, delta) {
+    var copy = state.tracks.slice();
+    var item = copy.splice(index, 1)[0];
+    copy.splice(index + delta, 0, item);
+    setBusy(true);
+    saveTracks(copy, "Admin : réorganisation des sorties")
+      .then(function () { flash("Ordre enregistré. Le site sera à jour d’ici 1 à 2 minutes."); })
+      .catch(function (err) { flash(explain(err), true); })
+      .then(function () { setBusy(false); renderTracks(); });
+  }
+
+  function remove(index) {
+    var track = state.tracks[index];
+    if (!window.confirm("Supprimer « " + (track.title || "cette sortie") + " » du site ?")) return;
+    var copy = state.tracks.slice();
+    copy.splice(index, 1);
+    setBusy(true);
+    saveTracks(copy, "Admin : suppression de « " + track.title + " »")
+      .then(function () { flash("« " + track.title + " » a été supprimée. Le site sera à jour d’ici 1 à 2 minutes."); })
+      .catch(function (err) { flash(explain(err), true); })
+      .then(function () { setBusy(false); renderTracks(); });
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Formulaire d'une sortie                                                 */
+  /* ---------------------------------------------------------------------- */
+
+  function slugify(text) {
+    return String(text || "").toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "sortie";
+  }
+
+  function uniqueId(base) {
+    var id = base, n = 2;
+    var taken = function (x) { return state.tracks.some(function (t) { return t.id === x; }); };
+    while (taken(id)) id = base + "-" + n++;
+    return id;
+  }
+
+  function openForm(index) {
+    var form = $("track-form");
+    var track = index >= 0 ? state.tracks[index] : null;
+    state.editingIndex = index;
+    state.coverData = null;
+    form.reset();
+    $("track-status").textContent = "";
+    $("track-dialog-title").textContent = track ? "Modifier « " + track.title + " »" : "Nouvelle sortie";
+
+    $("t-title").value = track ? track.title || "" : "";
+    $("t-type").value = track && track.type ? track.type : "Single";
+    $("t-releaseDate").value = track ? track.releaseDate || "" : "";
+    $("t-artist").value = track ? track.artist || "" : "DPT";
+    $("t-mainLink").value = track ? track.mainLink || "" : "";
+    PLATFORMS.forEach(function (key) {
+      $("t-" + key).value = track && track.platforms ? track.platforms[key] || "" : "";
+    });
+    $("cover-preview").src = track ? coverSrc(track) : "../assets/img/covers/placeholder.jpg";
+
+    $("track-dialog").showModal();
+    $("t-title").focus();
+  }
+
+  /* Recadre l'image en carré, la redimensionne et la compresse en JPEG. */
+  function processCover(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var side = Math.min(img.naturalWidth, img.naturalHeight);
+        var size = Math.min(CONFIG.coverSize, side);
+        var canvas = document.createElement("canvas");
+        canvas.width = canvas.height = size;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#0b0b0d";
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", CONFIG.coverQuality));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Image illisible.")); };
+      img.src = url;
+    });
+  }
+
+  function uploadCover(id, dataUrl) {
+    var path = CONFIG.coversDir + id + ".jpg";
+    return getFile(path, true).then(function (existing) {
+      return putFile(path, dataUrl.split(",")[1], existing && existing.sha, "Admin : pochette de « " + id + " »");
+    }).then(function () {
+      // Le paramètre ?v= force les navigateurs à afficher la nouvelle image.
+      return path + "?v=" + Date.now().toString(36);
+    });
+  }
+
+  function submitTrack(e) {
+    e.preventDefault();
+    var form = $("track-form");
+    if (!form.reportValidity()) return;
+
+    var editing = state.editingIndex >= 0;
+    var old = editing ? state.tracks[state.editingIndex] : null;
+    var title = $("t-title").value.trim();
+    var id = editing ? old.id : uniqueId(slugify(title));
+
+    var track = {
+      id: id,
+      title: title,
+      artist: $("t-artist").value.trim() || "DPT",
+      releaseDate: $("t-releaseDate").value.trim(),
+      type: $("t-type").value,
+      cover: old ? old.cover || "" : "",
+      mainLink: $("t-mainLink").value.trim(),
+      platforms: {}
+    };
+    PLATFORMS.forEach(function (key) { track.platforms[key] = $("t-" + key).value.trim(); });
+
+    var status = $("track-status");
+    setBusy(true);
+
+    var step = Promise.resolve();
+    if (state.coverData) {
+      status.textContent = "Envoi de la pochette…";
+      var coverData = state.coverData;
+      step = uploadCover(id, coverData).then(function (path) {
+        track.cover = path;
+        state.previews[id] = coverData;
+      });
+    }
+
+    step.then(function () {
+      status.textContent = "Publication…";
+      var copy = state.tracks.slice();
+      if (editing) copy[state.editingIndex] = track;
+      else copy.unshift(track); // les nouvelles sorties arrivent en haut
+      return saveTracks(copy, (editing ? "Admin : modification de « " : "Admin : nouvelle sortie « ") + title + " »");
+    }).then(function () {
+      $("track-dialog").close();
+      flash("« " + title + " » est enregistrée. Le site sera à jour d’ici 1 à 2 minutes.");
+    }).catch(function (err) {
+      status.textContent = explain(err);
+    }).then(function () { setBusy(false); });
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Paramètres (site.json)                                                  */
+  /* ---------------------------------------------------------------------- */
+
+  function buildSocialFields() {
+    var box = $("socials-fields");
+    Object.keys(SOCIALS).forEach(function (key) {
+      var wrap = document.createElement("div");
+      var label = document.createElement("label");
+      label.htmlFor = "s-social-" + key;
+      label.textContent = SOCIALS[key];
+      var input = document.createElement("input");
+      input.id = "s-social-" + key;
+      input.type = "url";
+      input.placeholder = "https://…";
+      wrap.appendChild(label);
+      wrap.appendChild(input);
+      box.appendChild(wrap);
+    });
+  }
+
+  function fillSettings() {
+    var s = state.site;
+    ["tagline", "listenLink", "email", "formspreeId"].forEach(function (k) { $("s-" + k).value = s[k] || ""; });
+    Object.keys(SOCIALS).forEach(function (k) { $("s-social-" + k).value = (s.socials && s.socials[k]) || ""; });
+  }
+
+  function submitSettings(e) {
+    e.preventDefault();
+    if (!$("settings-form").reportValidity()) return;
+    var site = JSON.parse(JSON.stringify(state.site)); // conserve les autres champs (ex. _aide)
+    ["tagline", "listenLink", "email", "formspreeId"].forEach(function (k) { site[k] = $("s-" + k).value.trim(); });
+    site.socials = site.socials || {};
+    Object.keys(SOCIALS).forEach(function (k) { site.socials[k] = $("s-social-" + k).value.trim(); });
+
+    setBusy(true);
+    writeJSON(CONFIG.sitePath, site, state.siteSha, "Admin : mise à jour des liens et du contact")
+      .then(function (sha) {
+        state.site = site;
+        state.siteSha = sha;
+        flash("Liens et contact enregistrés. Le site sera à jour d’ici 1 à 2 minutes.");
+      })
+      .catch(function (err) { flash(explain(err), true); })
+      .then(function () { setBusy(false); });
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Démarrage                                                               */
+  /* ---------------------------------------------------------------------- */
+
+  function selectTab(name) {
+    var tracks = name === "tracks";
+    $("tab-tracks").setAttribute("aria-selected", String(tracks));
+    $("tab-settings").setAttribute("aria-selected", String(!tracks));
+    $("tracks-view").hidden = !tracks;
+    $("settings-view").hidden = tracks;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    buildSocialFields();
+
+    $("login-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var token = $("token").value.trim();
+      var status = $("login-status");
+      status.textContent = "Connexion…";
+      login(token).then(function () {
+        storeToken(token, $("remember").checked);
+        $("token").value = "";
+        status.textContent = "";
+      }).catch(function (err) {
+        show("login");
+        status.textContent = explain(err);
+      });
+    });
+
+    $("logout").addEventListener("click", function () {
+      clearToken();
+      state.token = "";
+      $("flash").hidden = true;
+      show("login");
+    });
+
+    $("tab-tracks").addEventListener("click", function () { selectTab("tracks"); });
+    $("tab-settings").addEventListener("click", function () { selectTab("settings"); });
+
+    $("new-track").addEventListener("click", function () { openForm(-1); });
+    $("track-cancel").addEventListener("click", function () { $("track-dialog").close(); });
+    $("track-form").addEventListener("submit", submitTrack);
+    $("settings-form").addEventListener("submit", submitSettings);
+
+    $("t-cover").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      processCover(file).then(function (data) {
+        state.coverData = data;
+        $("cover-preview").src = data;
+      }).catch(function (err) { $("track-status").textContent = err.message; });
+    });
+
+    var saved = readToken();
+    if (saved) {
+      login(saved).catch(function (err) {
+        show("login");
+        $("login-status").textContent = explain(err);
+      });
+    } else {
+      show("login");
+    }
+  });
+})();

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DPT — Site officiel</title>
+  <meta name="description" content="Découvrez la musique de DPT : singles, projets, clips et liens d’écoute officiels.">
+  <link rel="canonical" href="https://dptmusic.fr/">
+  <meta name="theme-color" content="#0b0b0d">
+
+  <!-- Partage sur les réseaux (WhatsApp, Instagram, X, Facebook) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DPT">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="DPT — Site officiel">
+  <meta property="og:description" content="Écoutez toute la musique de DPT.">
+  <meta property="og:image" content="https://dptmusic.fr/assets/img/artist.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="1200">
+  <meta property="og:image:alt" content="DPT">
+  <meta property="og:url" content="https://dptmusic.fr/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DPT — Site officiel">
+  <meta name="twitter:description" content="Écoutez toute la musique de DPT.">
+  <meta name="twitter:image" content="https://dptmusic.fr/assets/img/artist.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+  <!-- Polices -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/main.js" defer></script>
+</head><body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="DPT — Accueil">
+        <!-- LOGO : remplacez assets/img/logo.png par le logo officiel (PNG transparent, environ 600 px de large) -->
+        <img src="assets/img/logo.png" alt="DPT" width="413" height="166">
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu"><span></span></button>
+      <nav id="site-nav" class="nav" aria-label="Navigation principale">
+        <a href="index.html" aria-current="page">Accueil</a>
+        <a href="music.html">Musique</a>
+        <a href="about.html">À propos</a>
+        <a href="contact.html">Contact</a>
+        <!-- Bouton « Écouter » : le lien se règle dans assets/data/site.json (listenLink) -->
+        <a class="btn btn-primary btn-sm" href="https://ditto.fm/dpt-dpt" data-listen>Écouter</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenu">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow reveal">Site officiel</span>
+          <h1 class="hero-title reveal">DPT</h1>
+          <!-- SLOGAN : à renseigner dans assets/data/site.json (tagline). Masqué tant qu'il est vide. -->
+          <p class="hero-tagline reveal reveal-2" data-tagline></p>
+          <div class="hero-actions reveal reveal-2">
+            <a class="btn btn-primary" href="https://ditto.fm/dpt-dpt" data-listen>Écouter la musique</a>
+            <a class="btn btn-ghost" href="music.html">Voir la discographie</a>
+          </div>
+          <ul class="socials reveal reveal-3" data-socials aria-label="DPT sur les réseaux"></ul>
+        </div>
+        <div class="hero-media reveal reveal-2">
+          <!-- PHOTO OFFICIELLE : remplacez assets/img/artist.jpg (format carré conseillé, 1200 × 1200 px, moins de 300 Ko) -->
+          <img src="assets/img/artist.jpg" alt="Portrait de l’artiste DPT" width="1200" height="1200" fetchpriority="high">
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="latest-title">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Musique</span>
+            <h2 id="latest-title">Dernières sorties</h2>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="music.html">Toute la discographie</a>
+        </div>
+        <!-- Affiche automatiquement les 3 premiers morceaux de assets/data/tracks.json -->
+        <div class="tracks-grid" data-latest="3" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <!-- Réseaux sociaux : liens à renseigner dans assets/data/site.json (socials). Les liens vides ne s'affichent pas. -->
+      <ul class="socials" data-socials aria-label="DPT sur les réseaux"></ul>
+      <div class="footer-grid">
+        <p>&copy; <span data-year>2026</span> DPT. Tous droits réservés.</p>
+        <ul class="footer-links">
+          <li><a href="music.html">Musique</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="mentions-legales.html">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
