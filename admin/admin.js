@@ -17,12 +17,15 @@
     tracksPath: "assets/data/tracks.json",
     sitePath: "assets/data/site.json",
     coversDir: "assets/img/covers/",
+    importRequestPath: "import/demande.json",  // lu par la GitHub Action d'import
+    importResultPath: "import/resultat.json",
+    importTimeout: 180000, // on attend la fin de l'import 3 minutes au plus
     coverSize: 800,      // pochettes enregistrées en 800 × 800 px
     coverQuality: 0.82   // qualité JPEG
   };
 
   var TOKEN_KEY = "dpt-admin-token";
-  var PLATFORMS = ["spotify", "appleMusic", "youtube", "deezer"];
+  var PLATFORMS = ["spotify", "appleMusic", "youtube", "youtubeMusic", "deezer", "soundcloud", "tidal", "amazonMusic"];
   var SOCIALS = {
     spotify: "Spotify",
     appleMusic: "Apple Music",
@@ -258,7 +261,7 @@
   }
 
   function setBusy(busy) {
-    document.querySelectorAll("#app-view button, #track-form button").forEach(function (b) {
+    document.querySelectorAll("#app-view button, #track-form button, #import-form input").forEach(function (b) {
       if (busy) { b.dataset.wasDisabled = b.disabled ? "1" : ""; b.disabled = true; }
       else { b.disabled = b.dataset.wasDisabled === "1"; }
     });
@@ -377,7 +380,8 @@
       type: $("t-type").value,
       cover: old ? old.cover || "" : "",
       mainLink: $("t-mainLink").value.trim(),
-      platforms: {}
+      // On part des liens existants pour garder ceux que le formulaire n'affiche pas (ex. Anghami, importés de ditto.fm).
+      platforms: Object.assign({}, old && old.platforms)
     };
     PLATFORMS.forEach(function (key) { track.platforms[key] = $("t-" + key).value.trim(); });
 
@@ -403,6 +407,78 @@
     }).then(function () {
       $("track-dialog").close();
       flash("« " + title + " » est enregistrée. Le site sera à jour d’ici 1 à 2 minutes.");
+    }).catch(function (err) {
+      status.textContent = explain(err);
+    }).then(function () { setBusy(false); });
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Import depuis ditto.fm                                                  */
+  /* ---------------------------------------------------------------------- */
+
+  /* Le navigateur ne peut pas lire ditto.fm : l'admin dépose le lien dans
+     import/demande.json, une GitHub Action lit la page, ajoute la sortie et
+     écrit le compte rendu dans import/resultat.json, que l'on surveille ici. */
+
+  function isDittoLink(value) {
+    return /^https?:\/\/(www\.)?ditto\.fm\/[A-Za-z0-9._~-]+\/?$/.test(value);
+  }
+
+  function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
+
+  function waitForImport(requestId, startedAt) {
+    return getFile(CONFIG.importResultPath, true).then(function (file) {
+      var result = file ? JSON.parse(base64ToUtf8(file.content)) : null;
+      if (result && result.requestId === requestId) return result;
+      if (Date.now() - startedAt > CONFIG.importTimeout) {
+        throw new Error("L’import prend plus de temps que prévu. Rechargez la page dans quelques minutes, ou regardez l’onglet « Actions » du dépôt GitHub.");
+      }
+      return wait(5000).then(function () { return waitForImport(requestId, startedAt); });
+    });
+  }
+
+  /* Affiche la pochette importée tout de suite, sans attendre la mise à jour du site. */
+  function loadCoverPreview(track) {
+    if (!track || !track.cover) return Promise.resolve();
+    return getFile(track.cover.split("?")[0], true).then(function (file) {
+      if (file && file.content) state.previews[track.id] = "data:image/jpeg;base64," + file.content.replace(/\s/g, "");
+    }).catch(function () { /* la pochette s'affichera après la mise à jour du site */ });
+  }
+
+  function submitImport(e) {
+    e.preventDefault();
+    var input = $("import-url");
+    var status = $("import-status");
+    var url = input.value.trim();
+    if (!isDittoLink(url)) {
+      status.textContent = "Collez un lien de la forme https://ditto.fm/nom-du-titre";
+      input.focus();
+      return;
+    }
+
+    var requestId = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+    var request = { url: url, requestId: requestId, requestedAt: new Date().toISOString() };
+    setBusy(true);
+    status.textContent = "Envoi du lien…";
+
+    getFile(CONFIG.importRequestPath, true).then(function (existing) {
+      return writeJSON(CONFIG.importRequestPath, request, existing && existing.sha, "Admin : import de " + url);
+    }).then(function () {
+      status.textContent = "Lecture de la page ditto.fm (titre, pochette, liens)… cela prend environ 30 secondes.";
+      return waitForImport(requestId, Date.now());
+    }).then(function (result) {
+      if (result.status !== "ok") throw new Error("Import impossible : " + result.message);
+      return readJSON(CONFIG.tracksPath).then(function (file) {
+        state.tracks = file.data;
+        state.tracksSha = file.sha;
+        var track = state.tracks.filter(function (t) { return t.id === result.trackId; })[0];
+        return loadCoverPreview(track);
+      }).then(function () {
+        renderTracks();
+        input.value = "";
+        status.textContent = "";
+        flash(result.message + " Le site sera à jour d’ici 1 à 2 minutes. Vérifiez le type et la date avec « Modifier ».");
+      });
     }).catch(function (err) {
       status.textContent = explain(err);
     }).then(function () { setBusy(false); });
@@ -497,6 +573,7 @@
     $("new-track").addEventListener("click", function () { openForm(-1); });
     $("track-cancel").addEventListener("click", function () { $("track-dialog").close(); });
     $("track-form").addEventListener("submit", submitTrack);
+    $("import-form").addEventListener("submit", submitImport);
     $("settings-form").addEventListener("submit", submitSettings);
 
     $("t-cover").addEventListener("change", function (e) {
