@@ -1,5 +1,27 @@
 [
   {
+    "id": "le-train-invisible",
+    "title": "le train invisible",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/le-train-invisible.jpg?v=mvl0zaaw",
+    "mainLink": "https://ditto.fm/le-train-invisible",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/5yVmVYbGJ1YNbzYtbtrVKi",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=cXiHnyRk2kQ",
+      "deezer": "https://www.deezer.com/track/4336954132",
+      "tidal": "https://www.tidal.com/track/568383794",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/le-train-invisible",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HMFNB91G/",
+      "anghami": "https://play.anghami.com/song/1306626956",
+      "youtubeMusic": "https://music.youtube.com/watch?v=cXiHnyRk2kQ",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/P-Cc_7Q2hnTeOjApTv",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/438788355/"
+    }
+  },
+  {
     "id": "plus-de-deception",
     "title": "Plus de Déception",
     "artist": "DPT",
