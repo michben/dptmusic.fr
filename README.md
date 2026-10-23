@@ -23,6 +23,7 @@ dptmusic.fr/
 ├── contact.html            Contact
 ├── mentions-legales.html   Mentions légales (à compléter)
 ├── 404.html                Page « introuvable »
+├── admin/                  Espace admin (gestion des sorties et des liens)
 ├── assets/
 │   ├── css/style.css       Styles (couleurs en haut du fichier)
 │   ├── js/main.js          Script (pas besoin d’y toucher)
@@ -43,7 +44,33 @@ dptmusic.fr/
 
 ---
 
-## Ajouter un nouveau morceau
+## Espace admin : gérer les sorties sans toucher au code
+
+Une interface d’administration est disponible à l’adresse **https://dptmusic.fr/admin/** (une fois le site publié). Elle permet de :
+
+- **ajouter une nouvelle sortie** (titre, type, date, lien d’écoute, liens Spotify / Apple Music / YouTube / Deezer, pochette) ;
+- **modifier** ou **supprimer** une sortie ;
+- **changer l’ordre** des sorties (flèches ↑ ↓) ;
+- modifier le **slogan**, le lien **Écouter**, l’**e-mail**, **Formspree** et les **réseaux sociaux** (onglet « Liens et contact »).
+
+La pochette envoyée est automatiquement recadrée en carré, redimensionnée en 800 × 800 px et compressée. Chaque enregistrement crée une modification (commit) dans le dépôt GitHub, et le site se met à jour tout seul en 1 à 2 minutes.
+
+### Première connexion : créer un jeton GitHub (une seule fois)
+
+L’admin utilise un « jeton d’accès personnel » GitHub, limité à ce seul dépôt :
+
+1. Connecté à GitHub, ouvrez https://github.com/settings/personal-access-tokens/new
+2. **Token name** : `Admin site DPT` ; **Expiration** : par exemple 1 an.
+3. **Repository access** : *Only select repositories* → `michben/dptmusic.fr`.
+4. **Permissions** → **Repository permissions** → **Contents** : *Read and write*.
+5. **Generate token**, copiez le jeton (`github_pat_…`) et collez-le sur la page `/admin/`.
+
+Le jeton est gardé uniquement dans votre navigateur (case « Rester connecté »). Ne le partagez pas ; s’il est perdu ou compromis, supprimez-le sur https://github.com/settings/personal-access-tokens et créez-en un nouveau. La page admin n’est pas référencée par les moteurs de recherche (`robots.txt` et `noindex`) et ne fonctionne pas sans jeton.
+
+## Ajouter un nouveau morceau à la main
+
+L’espace admin ci-dessus est la méthode la plus simple. Pour le faire directement dans les fichiers :
+
 
 1. **Pochette** : ajoutez l’image dans `assets/img/covers/`, par exemple `assets/img/covers/mon-titre.jpg`.
    - Format carré, idéalement **800 × 800 px**, en JPG, **moins de 150 Ko** (voir « Optimiser les images » plus bas).

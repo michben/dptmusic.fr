@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- Sécurité : cette page ne peut parler qu'à l'API GitHub, ce qui protège votre jeton. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com; img-src 'self' data: blob:; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Admin — DPT</title>
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="../index.html" aria-label="Voir le site">
+        <img src="../assets/img/logo.png" alt="DPT" width="413" height="166">
+      </a>
+      <div class="admin-header-actions">
+        <span class="admin-badge">Admin</span>
+        <button class="btn btn-ghost btn-sm" type="button" id="logout" hidden>Se déconnecter</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenu" class="admin">
+    <div class="container">
+
+      <!-- ===== Connexion ===== -->
+      <section id="login-view" class="admin-panel admin-narrow" hidden>
+        <h1>Espace admin</h1>
+        <p class="lead">Ajoutez et modifiez vos sorties sans toucher au code. Chaque enregistrement met à jour le site en 1 à 2 minutes.</p>
+
+        <form id="login-form" class="form">
+          <div>
+            <label for="token">Jeton d’accès GitHub</label>
+            <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" required>
+          </div>
+          <label class="check"><input type="checkbox" id="remember" checked> Rester connecté sur cet appareil</label>
+          <button class="btn btn-primary" type="submit">Se connecter</button>
+          <p class="form-status" id="login-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <details class="help">
+          <summary>Comment obtenir un jeton ? (à faire une seule fois)</summary>
+          <ol>
+            <li>Connectez-vous sur GitHub, puis ouvrez <strong>github.com/settings/personal-access-tokens/new</strong>.</li>
+            <li><strong>Token name</strong> : « Admin site DPT ». <strong>Expiration</strong> : par exemple 1 an.</li>
+            <li><strong>Repository access</strong> : « Only select repositories » puis choisissez <strong>michben/dptmusic.fr</strong>.</li>
+            <li><strong>Permissions</strong> → <strong>Repository permissions</strong> → <strong>Contents</strong> : « Read and write ».</li>
+            <li>Cliquez sur <strong>Generate token</strong>, copiez le jeton (il commence par <code>github_pat_</code>) et collez-le ci-dessus.</li>
+          </ol>
+          <p>Le jeton reste uniquement dans votre navigateur. Ne le partagez avec personne.</p>
+        </details>
+      </section>
+
+      <!-- ===== Tableau de bord ===== -->
+      <section id="app-view" hidden>
+        <div class="admin-top">
+          <h1>Espace admin</h1>
+          <nav class="admin-tabs" role="tablist" aria-label="Sections">
+            <button class="filter-btn" type="button" role="tab" id="tab-tracks" aria-controls="tracks-view" aria-selected="true">Sorties</button>
+            <button class="filter-btn" type="button" role="tab" id="tab-settings" aria-controls="settings-view" aria-selected="false">Liens et contact</button>
+          </nav>
+        </div>
+
+        <p class="admin-flash" id="flash" role="status" aria-live="polite" hidden></p>
+
+        <!-- Sorties -->
+        <div id="tracks-view" role="tabpanel" aria-labelledby="tab-tracks">
+          <div class="section-head">
+            <p class="lead admin-intro">Les sorties en haut de la liste s’affichent en premier sur le site et dans « Dernières sorties ».</p>
+            <button class="btn btn-primary" type="button" id="new-track">+ Nouvelle sortie</button>
+          </div>
+          <ol class="admin-list" id="track-list"></ol>
+        </div>
+
+        <!-- Paramètres -->
+        <div id="settings-view" role="tabpanel" aria-labelledby="tab-settings" hidden>
+          <form id="settings-form" class="form admin-panel">
+            <p class="hint">Laissez un champ vide pour masquer l’élément sur le site.</p>
+            <div>
+              <label for="s-tagline">Slogan (sous « DPT » sur l’accueil)</label>
+              <input id="s-tagline" name="tagline" type="text">
+            </div>
+            <div>
+              <label for="s-listenLink">Lien des boutons « Écouter »</label>
+              <input id="s-listenLink" name="listenLink" type="url" placeholder="https://…">
+            </div>
+            <div class="form-row">
+              <div>
+                <label for="s-email">E-mail de contact</label>
+                <input id="s-email" name="email" type="email">
+              </div>
+              <div>
+                <label for="s-formspreeId">Identifiant Formspree</label>
+                <input id="s-formspreeId" name="formspreeId" type="text" placeholder="ex. xyzabcd">
+              </div>
+            </div>
+            <fieldset>
+              <legend>Réseaux sociaux et plateformes</legend>
+              <div class="form-row" id="socials-fields"></div>
+            </fieldset>
+            <button class="btn btn-primary" type="submit">Enregistrer</button>
+          </form>
+        </div>
+      </section>
+
+      <p id="loading" class="admin-panel admin-narrow">Chargement…</p>
+    </div>
+  </main>
+
+  <!-- ===== Formulaire d'une sortie ===== -->
+  <dialog id="track-dialog" class="admin-dialog" aria-labelledby="track-dialog-title">
+    <form id="track-form" class="form" method="dialog">
+      <h2 id="track-dialog-title">Nouvelle sortie</h2>
+
+      <div class="cover-field">
+        <img id="cover-preview" src="../assets/img/covers/placeholder.jpg" alt="Aperçu de la pochette" width="160" height="160">
+        <div>
+          <label for="t-cover">Pochette (image carrée, JPG ou PNG)</label>
+          <input id="t-cover" type="file" accept="image/jpeg,image/png,image/webp">
+          <p class="hint">Elle est automatiquement redimensionnée et compressée.</p>
+        </div>
+      </div>
+
+      <div>
+        <label for="t-title">Titre *</label>
+        <input id="t-title" name="title" type="text" required>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="t-type">Type de sortie</label>
+          <select id="t-type" name="type">
+            <option>Single</option>
+            <option>EP</option>
+            <option>Album</option>
+            <option>Featuring</option>
+          </select>
+        </div>
+        <div>
+          <label for="t-releaseDate">Date de sortie</label>
+          <input id="t-releaseDate" name="releaseDate" type="text" inputmode="numeric" placeholder="AAAA-MM-JJ ou AAAA" pattern="\d{4}(-\d{2}-\d{2})?">
+        </div>
+      </div>
+      <div>
+        <label for="t-artist">Artiste(s)</label>
+        <input id="t-artist" name="artist" type="text" placeholder="DPT">
+      </div>
+      <div>
+        <label for="t-mainLink">Lien principal du bouton « Écouter » *</label>
+        <input id="t-mainLink" name="mainLink" type="url" placeholder="https://ditto.fm/…" required>
+      </div>
+      <fieldset>
+        <legend>Liens directs (facultatifs)</legend>
+        <div class="form-row">
+          <div><label for="t-spotify">Spotify</label><input id="t-spotify" name="spotify" type="url" placeholder="https://…"></div>
+          <div><label for="t-appleMusic">Apple Music</label><input id="t-appleMusic" name="appleMusic" type="url" placeholder="https://…"></div>
+          <div><label for="t-youtube">YouTube</label><input id="t-youtube" name="youtube" type="url" placeholder="https://…"></div>
+          <div><label for="t-deezer">Deezer</label><input id="t-deezer" name="deezer" type="url" placeholder="https://…"></div>
+        </div>
+      </fieldset>
+
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="track-cancel">Annuler</button>
+        <button class="btn btn-primary" type="submit" id="track-save">Enregistrer et publier</button>
+      </div>
+      <p class="form-status" id="track-status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+</body>
+</html>
