@@ -93,6 +93,7 @@
         if (!res.ok) {
           var err = new Error(data.message || ("Erreur " + res.status));
           err.status = res.status;
+          err.write = (options.method || "GET") !== "GET";
           throw err;
         }
         return data;
@@ -141,6 +142,8 @@
 
   function explain(err) {
     if (err.status === 401) return "Jeton refusé ou expiré. Déconnectez-vous et collez un nouveau jeton.";
+    // Le dépôt est public : un jeton sans droit d'écriture peut tout lire, mais GitHub répond « Not Found » à l'enregistrement.
+    if (err.status === 404 && err.write) return "GitHub refuse l’enregistrement (« Not Found ») : votre jeton n’a pas le droit d’écrire sur michben/dptmusic.fr. Créez un nouveau jeton en suivant l’aide « Comment obtenir un jeton ? » (Only select repositories → michben/dptmusic.fr, et Contents : Read and write), puis déconnectez-vous et collez-le.";
     if (err.status === 403) return "Ce jeton n’a pas le droit de modifier le dépôt (permission « Contents : Read and write » requise).";
     if (err.status === 409 || err.status === 422) return "Le fichier a changé entre-temps. Rechargez la page puis recommencez.";
     if (err instanceof SyntaxError) return "Un fichier de données contient une erreur de syntaxe : " + err.message;
@@ -257,7 +260,27 @@
       state.tracks = newTracks;
       state.tracksSha = sha;
       renderTracks();
+    }, function (err) {
+      if (err.status !== 409 && err.status !== 422) throw err;
+      // Le fichier a changé sur GitHub (ex. un import ditto.fm) : on recharge la liste à jour.
+      return readJSON(CONFIG.tracksPath).then(function (file) {
+        state.tracks = file.data;
+        state.tracksSha = file.sha;
+        renderTracks();
+        throw new Error("La liste venait d’être modifiée ailleurs : elle a été rechargée. Refaites simplement votre modification.");
+      });
     });
+  }
+
+  /* <dialog> n'existe pas sur certains anciens navigateurs (ex. iPhone avant iOS 15.4). */
+  function openDialog(dialog) {
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else { dialog.classList.add("is-fallback"); dialog.setAttribute("open", ""); }
+  }
+
+  function closeDialog(dialog) {
+    if (typeof dialog.close === "function") dialog.close();
+    else dialog.removeAttribute("open");
   }
 
   function setBusy(busy) {
@@ -326,7 +349,7 @@
     });
     $("cover-preview").src = track ? coverSrc(track) : "../assets/img/covers/placeholder.jpg";
 
-    $("track-dialog").showModal();
+    openDialog($("track-dialog"));
     $("t-title").focus();
   }
 
@@ -405,7 +428,7 @@
       else copy.unshift(track); // les nouvelles sorties arrivent en haut
       return saveTracks(copy, (editing ? "Admin : modification de « " : "Admin : nouvelle sortie « ") + title + " »");
     }).then(function () {
-      $("track-dialog").close();
+      closeDialog($("track-dialog"));
       flash("« " + title + " » est enregistrée. Le site sera à jour d’ici 1 à 2 minutes.");
     }).catch(function (err) {
       status.textContent = explain(err);
@@ -542,6 +565,19 @@
     $("settings-view").hidden = tracks;
   }
 
+  /* Toute erreur inattendue s'affiche en haut de la page plutôt que de bloquer l'admin en silence. */
+  function showUnexpected(err) {
+    var box = $("flash");
+    if (!box) return;
+    box.textContent = "Erreur inattendue : " + ((err && err.message) || err) + ". Rechargez la page (Ctrl + Maj + R) puis réessayez.";
+    box.classList.add("is-error");
+    box.hidden = false;
+    var app = $("app-view");
+    if (app && app.hidden) { $("loading").hidden = true; $("login-view").hidden = false; $("login-status").textContent = box.textContent; }
+  }
+  window.addEventListener("error", function (e) { showUnexpected(e.error || e.message); });
+  window.addEventListener("unhandledrejection", function (e) { showUnexpected(e.reason); });
+
   document.addEventListener("DOMContentLoaded", function () {
     buildSocialFields();
 
@@ -571,7 +607,7 @@
     $("tab-settings").addEventListener("click", function () { selectTab("settings"); });
 
     $("new-track").addEventListener("click", function () { openForm(-1); });
-    $("track-cancel").addEventListener("click", function () { $("track-dialog").close(); });
+    $("track-cancel").addEventListener("click", function () { closeDialog($("track-dialog")); });
     $("track-form").addEventListener("submit", submitTrack);
     $("import-form").addEventListener("submit", submitImport);
     $("settings-form").addEventListener("submit", submitSettings);
