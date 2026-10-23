@@ -1,0 +1,21 @@
+{
+  "requestId": "test-1",
+  "url": "https://ditto.fm/plus-de-deception",
+  "status": "ok",
+  "message": "« Plus de Déception » a été ajoutée avec 10 plateformes.",
+  "trackId": "plus-de-deception",
+  "title": "Plus de Déception",
+  "platforms": [
+    "spotify",
+    "youtube",
+    "deezer",
+    "tidal",
+    "soundcloud",
+    "amazonMusic",
+    "anghami",
+    "youtubeMusic",
+    "kkbox",
+    "iheart"
+  ],
+  "finishedAt": "2026-10-23T13:25:37.754Z"
+}

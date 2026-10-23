@@ -1,5 +1,27 @@
 [
   {
+    "id": "plus-de-deception",
+    "title": "Plus de Déception",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/plus-de-deception.jpg?v=mvl064bd",
+    "mainLink": "https://ditto.fm/plus-de-deception",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/6oV8hFns7s1RfP5ySf4sGG",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=B1qtxxcT2oI",
+      "deezer": "https://www.deezer.com/track/4336941332",
+      "tidal": "https://www.tidal.com/track/568382376",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/plus-de-deception",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HMFM4T2B/",
+      "anghami": "https://play.anghami.com/song/1306624965",
+      "youtubeMusic": "https://music.youtube.com/watch?v=B1qtxxcT2oI",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/4kYE0DlvWkaL817mMH",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/438786861/"
+    }
+  },
+  {
     "id": "dpt-dpt",
     "title": "DPT",
     "artist": "DPT",
