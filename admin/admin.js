@@ -93,6 +93,7 @@
         if (!res.ok) {
           var err = new Error(data.message || ("Erreur " + res.status));
           err.status = res.status;
+          err.write = (options.method || "GET") !== "GET";
           throw err;
         }
         return data;
@@ -141,6 +142,8 @@
 
   function explain(err) {
     if (err.status === 401) return "Jeton refusé ou expiré. Déconnectez-vous et collez un nouveau jeton.";
+    // Le dépôt est public : un jeton sans droit d'écriture peut tout lire, mais GitHub répond « Not Found » à l'enregistrement.
+    if (err.status === 404 && err.write) return "GitHub refuse l’enregistrement (« Not Found ») : votre jeton n’a pas le droit d’écrire sur michben/dptmusic.fr. Créez un nouveau jeton en suivant l’aide « Comment obtenir un jeton ? » (Only select repositories → michben/dptmusic.fr, et Contents : Read and write), puis déconnectez-vous et collez-le.";
     if (err.status === 403) return "Ce jeton n’a pas le droit de modifier le dépôt (permission « Contents : Read and write » requise).";
     if (err.status === 409 || err.status === 422) return "Le fichier a changé entre-temps. Rechargez la page puis recommencez.";
     if (err instanceof SyntaxError) return "Un fichier de données contient une erreur de syntaxe : " + err.message;

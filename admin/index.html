@@ -10,9 +10,9 @@
   <title>Admin — DPT</title>
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
-  <link rel="stylesheet" href="../assets/css/style.css?v=3">
-  <link rel="stylesheet" href="admin.css?v=3">
-  <script src="admin.js?v=3" defer></script>
+  <link rel="stylesheet" href="../assets/css/style.css?v=4">
+  <link rel="stylesheet" href="admin.css?v=4">
+  <script src="admin.js?v=4" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -50,7 +50,7 @@
           <ol>
             <li>Connectez-vous sur GitHub, puis ouvrez <strong>github.com/settings/personal-access-tokens/new</strong>.</li>
             <li><strong>Token name</strong> : « Admin site DPT ». <strong>Expiration</strong> : par exemple 1 an.</li>
-            <li><strong>Repository access</strong> : « Only select repositories » puis choisissez <strong>michben/dptmusic.fr</strong>.</li>
+            <li><strong>Repository access</strong> : « Only select repositories » puis choisissez <strong>michben/dptmusic.fr</strong>. Attention : l’option par défaut « Public repositories » ne permet que de lire, et l’enregistrement échoue avec « Not Found ».</li>
             <li><strong>Permissions</strong> → <strong>Repository permissions</strong> → <strong>Contents</strong> : « Read and write ».</li>
             <li>Cliquez sur <strong>Generate token</strong>, copiez le jeton (il commence par <code>github_pat_</code>) et collez-le ci-dessus.</li>
           </ol>
