@@ -1,5 +1,27 @@
 [
   {
+    "id": "qui-suis-je",
+    "title": "qui suis-je ?",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/qui-suis-je.jpg?v=mvl10z68",
+    "mainLink": "https://ditto.fm/qui-suis-je-dpt",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/1QaHt68aEfYBcOkFDXa5kC",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=aiuW-9idgxI",
+      "deezer": "https://www.deezer.com/track/4336964582",
+      "tidal": "https://www.tidal.com/track/568385419",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/qui-suis-je",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HMFNV5X6/",
+      "anghami": "https://play.anghami.com/song/1306627743",
+      "youtubeMusic": "https://music.youtube.com/watch?v=aiuW-9idgxI",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/GlMPGbGpylVNGrIrCq",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/438790122/"
+    }
+  },
+  {
     "id": "d-t",
     "title": "DπT",
     "artist": "DPT",

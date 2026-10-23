@@ -1,10 +1,10 @@
 {
-  "requestId": "mvl0zovx-4xuih7",
-  "url": "https://ditto.fm/dpt-dpt",
+  "requestId": "mvl10q1n-qjbq56",
+  "url": "https://ditto.fm/qui-suis-je-dpt",
   "status": "ok",
-  "message": "« DπT » a été ajoutée avec 10 plateformes.",
-  "trackId": "d-t",
-  "title": "DπT",
+  "message": "« qui suis-je ? » a été ajoutée avec 10 plateformes.",
+  "trackId": "qui-suis-je",
+  "title": "qui suis-je ?",
   "platforms": [
     "spotify",
     "youtube",
@@ -17,5 +17,5 @@
     "kkbox",
     "iheart"
   ],
-  "finishedAt": "2026-10-23T13:48:52.951Z"
+  "finishedAt": "2026-10-23T13:49:37.425Z"
 }
