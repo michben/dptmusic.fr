@@ -1,5 +1,27 @@
 [
   {
+    "id": "d-t",
+    "title": "DπT",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/d-t.jpg?v=mvl100uu",
+    "mainLink": "https://ditto.fm/dpt-dpt",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/4ocCXtbwKVUINXM8x5Wi4C",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=mRDt7mnH-co",
+      "deezer": "https://www.deezer.com/track/4320614402",
+      "tidal": "https://www.tidal.com/track/565955366",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/dpt",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HLMP3SYQ/",
+      "anghami": "https://play.anghami.com/song/1304826127",
+      "youtubeMusic": "https://music.youtube.com/watch?v=mRDt7mnH-co",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/Sp2c-Wpc1sYnr6IaUF",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/436690258/"
+    }
+  },
+  {
     "id": "le-train-invisible",
     "title": "le train invisible",
     "artist": "DPT",

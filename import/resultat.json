@@ -1,10 +1,10 @@
 {
-  "requestId": "mvl0z2dv-loslf2",
-  "url": "https://ditto.fm/le-train-invisible",
+  "requestId": "mvl0zovx-4xuih7",
+  "url": "https://ditto.fm/dpt-dpt",
   "status": "ok",
-  "message": "« le train invisible » a été ajoutée avec 10 plateformes.",
-  "trackId": "le-train-invisible",
-  "title": "le train invisible",
+  "message": "« DπT » a été ajoutée avec 10 plateformes.",
+  "trackId": "d-t",
+  "title": "DπT",
   "platforms": [
     "spotify",
     "youtube",
@@ -17,5 +17,5 @@
     "kkbox",
     "iheart"
   ],
-  "finishedAt": "2026-10-23T13:48:18.537Z"
+  "finishedAt": "2026-10-23T13:48:52.951Z"
 }
