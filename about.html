@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>À propos — DPT</title>
+  <meta name="description" content="Biographie, univers musical et influences de l’artiste DPT.">
+  <link rel="canonical" href="https://dptmusic.fr/about.html">
+  <meta name="theme-color" content="#0b0b0d">
+
+  <!-- Partage sur les réseaux (WhatsApp, Instagram, X, Facebook) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DPT">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="À propos — DPT">
+  <meta property="og:description" content="Découvrez l’univers de DPT.">
+  <meta property="og:image" content="https://dptmusic.fr/assets/img/artist.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="1200">
+  <meta property="og:image:alt" content="DPT">
+  <meta property="og:url" content="https://dptmusic.fr/about.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="À propos — DPT">
+  <meta name="twitter:description" content="Découvrez l’univers de DPT.">
+  <meta name="twitter:image" content="https://dptmusic.fr/assets/img/artist.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+  <!-- Polices -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/main.js" defer></script>
+</head><body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="DPT — Accueil">
+        <!-- LOGO : remplacez assets/img/logo.png par le logo officiel (PNG transparent, environ 600 px de large) -->
+        <img src="assets/img/logo.png" alt="DPT" width="413" height="166">
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu"><span></span></button>
+      <nav id="site-nav" class="nav" aria-label="Navigation principale">
+        <a href="index.html">Accueil</a>
+        <a href="music.html">Musique</a>
+        <a href="about.html" aria-current="page">À propos</a>
+        <a href="contact.html">Contact</a>
+        <!-- Bouton « Écouter » : le lien se règle dans assets/data/site.json (listenLink) -->
+        <a class="btn btn-primary btn-sm" href="https://ditto.fm/dpt-dpt" data-listen>Écouter</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenu">
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow reveal">L’artiste</span>
+        <h1 class="page-title reveal">À propos</h1>
+        <!-- ===== À COMPLÉTER : BIOGRAPHIE COURTE (1 à 2 phrases) =====
+             Remplacez tout le paragraphe ci-dessous (balise <p class="placeholder">) par :
+             <p class="lead">Votre texte ici.</p> -->
+        <p class="placeholder reveal reveal-2">Biographie courte à compléter (1 à 2 phrases).</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:1rem">
+      <div class="container about-grid">
+        <div class="about-photo">
+          <!-- PHOTO : remplacez assets/img/artist.jpg par la photo officielle -->
+          <img src="assets/img/artist.jpg" alt="Portrait de l’artiste DPT" width="1200" height="1200" loading="lazy">
+        </div>
+
+        <div>
+          <div class="about-block">
+            <h2>Biographie</h2>
+            <!-- ===== À COMPLÉTER : BIOGRAPHIE LONGUE =====
+                 Remplacez le bloc ci-dessous par un ou plusieurs paragraphes :
+                 <p>Premier paragraphe…</p>
+                 <p>Deuxième paragraphe…</p> -->
+            <p class="placeholder">Biographie longue à compléter : parcours, débuts, projets marquants.</p>
+          </div>
+
+          <div class="about-block">
+            <h2>Univers musical</h2>
+            <!-- ===== À COMPLÉTER : UNIVERS MUSICAL ===== -->
+            <p class="placeholder">Univers musical à compléter : style, thèmes, ambiance.</p>
+          </div>
+
+          <div class="about-block">
+            <h2>Influences</h2>
+            <!-- ===== À COMPLÉTER : INFLUENCES =====
+                 Exemple de liste :
+                 <ul>
+                   <li>Influence 1</li>
+                   <li>Influence 2</li>
+                 </ul> -->
+            <p class="placeholder">Influences à compléter : artistes, genres, références.</p>
+          </div>
+
+          <!-- ===== À COMPLÉTER : CITATION OU PHRASE SIGNATURE =====
+               Remplacez le texte entre les balises <blockquote> par la phrase de DPT. -->
+          <blockquote class="signature">
+            <span class="placeholder" style="display:block;font-family:var(--font-body);font-size:1rem">Citation ou phrase signature à compléter.</span>
+          </blockquote>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="https://ditto.fm/dpt-dpt" data-listen>Écouter la musique</a>
+            <a class="btn btn-ghost" href="contact.html">Contacter DPT</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <!-- Réseaux sociaux : liens à renseigner dans assets/data/site.json (socials). Les liens vides ne s'affichent pas. -->
+      <ul class="socials" data-socials aria-label="DPT sur les réseaux"></ul>
+      <div class="footer-grid">
+        <p>&copy; <span data-year>2026</span> DPT. Tous droits réservés.</p>
+        <ul class="footer-links">
+          <li><a href="music.html">Musique</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="mentions-legales.html">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
