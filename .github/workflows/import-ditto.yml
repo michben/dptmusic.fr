@@ -1,0 +1,79 @@
+# Importe une sortie depuis un lien ditto.fm (titre, pochette, liens des plateformes).
+#
+# Deux façons de la lancer :
+# - depuis l'admin du site (/admin/ → « Importer depuis ditto.fm ») : l'admin
+#   enregistre le lien dans import/demande.json, ce qui déclenche cette action ;
+# - depuis GitHub : onglet Actions → « Importer un lien ditto.fm » → Run workflow.
+#
+# Le résultat est enregistré dans import/resultat.json, et la sortie apparaît
+# dans assets/data/tracks.json (avec sa pochette dans assets/img/covers/).
+
+name: Importer un lien ditto.fm
+
+on:
+  push:
+    paths:
+      - import/demande.json
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Lien ditto.fm (ex. https://ditto.fm/plus-de-deception)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-ditto
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Outil de redimensionnement des pochettes
+        run: npm install --no-save --no-package-lock sharp@0.33.5
+
+      - name: Lecture de la page ditto.fm
+        id: run
+        continue-on-error: true
+        env:
+          URL_INPUT: ${{ github.event.inputs.url }}
+        run: |
+          if [ -n "$URL_INPUT" ]; then
+            node scripts/import-ditto.mjs "$URL_INPUT"
+          elif [ -f import/demande.json ]; then
+            node scripts/import-ditto.mjs
+          else
+            echo "Aucune demande à traiter."
+          fi
+
+      - name: Publication sur le site
+        run: |
+          rm -rf node_modules
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git add -A assets/data/tracks.json assets/img/covers import
+          if git diff --cached --quiet; then
+            echo "Rien à publier."
+            exit 0
+          fi
+          TITLE=$(node -e 'try{const r=require("./import/resultat.json");console.log(r.title||r.url||"")}catch(e){}')
+          git commit -m "Import ditto.fm : ${TITLE:-lien}"
+          for i in 1 2 3; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME" && break
+            sleep 3
+          done
+
+      - name: Échec de l'import
+        if: steps.run.outcome == 'failure'
+        run: |
+          cat import/resultat.json || true
+          exit 1

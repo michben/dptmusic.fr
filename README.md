@@ -67,6 +67,18 @@ L’admin utilise un « jeton d’accès personnel » GitHub, limité à ce seul
 
 Le jeton est gardé uniquement dans votre navigateur (case « Rester connecté »). Ne le partagez pas ; s’il est perdu ou compromis, supprimez-le sur https://github.com/settings/personal-access-tokens et créez-en un nouveau. La page admin n’est pas référencée par les moteurs de recherche (`robots.txt` et `noindex`) et ne fonctionne pas sans jeton.
 
+## Importer une sortie depuis un lien ditto.fm (le plus simple)
+
+Dans l’admin (`/admin/`), collez le lien ditto.fm de la sortie (ex. `https://ditto.fm/plus-de-deception`) dans **Importer depuis ditto.fm**, puis cliquez sur **Importer**. En 30 secondes environ, la sortie apparaît en haut de la liste avec :
+
+- le **titre** et la **pochette** de la page ditto.fm (enregistrée dans `assets/img/covers/`) ;
+- les **liens des plateformes** trouvés sur la page : Spotify, Apple Music, YouTube, YouTube Music, Deezer, SoundCloud, Tidal, Amazon Music (et d’autres comme Anghami, gardés dans les données) ;
+- le lien ditto.fm comme bouton **Écouter**.
+
+Rien n’est inventé : ce qui n’est pas sur la page reste vide. Le type est mis à `Single` par défaut et la date reste vide si ditto.fm ne l’affiche pas : corrigez-les avec **Modifier** si besoin. Réimporter un lien déjà présent met la sortie à jour (utile quand de nouvelles plateformes s’ajoutent après la sortie).
+
+Comment ça marche : un navigateur n’a pas le droit de lire ditto.fm, donc l’admin dépose le lien dans `import/demande.json` et une GitHub Action (`.github/workflows/import-ditto.yml`, script `scripts/import-ditto.mjs`) lit la page et publie le résultat. On peut aussi la lancer depuis GitHub : onglet **Actions** → **Importer un lien ditto.fm** → **Run workflow**. Le compte rendu du dernier import est dans `import/resultat.json`.
+
 ## Ajouter un nouveau morceau à la main
 
 L’espace admin ci-dessus est la méthode la plus simple. Pour le faire directement dans les fichiers :
@@ -90,7 +102,11 @@ L’espace admin ci-dessus est la méthode la plus simple. Pour le faire directe
       "spotify": "",
       "appleMusic": "",
       "youtube": "",
-      "deezer": ""
+      "youtubeMusic": "",
+      "deezer": "",
+      "soundcloud": "",
+      "tidal": "",
+      "amazonMusic": ""
     }
   },
   {

@@ -74,7 +74,14 @@
 .icon-btn:disabled { opacity: .35; cursor: default; }
 .icon-btn.danger:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 
+.admin-import { margin-bottom: 1.5rem; padding: 1.25rem 1.5rem; }
+.admin-import .hint { margin: .25rem 0 .75rem; }
+.admin-import-row { display: flex; gap: .6rem; }
+.admin-import-row input { flex: 1; min-width: 0; }
+.admin-import .form-status:empty { display: none; }
+
 @media (max-width: 640px) {
+  .admin-import-row { flex-direction: column; }
   .admin-item { flex-wrap: wrap; }
   .admin-item-actions { width: 100%; justify-content: flex-start; }
 }

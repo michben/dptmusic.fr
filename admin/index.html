@@ -76,6 +76,17 @@
             <p class="lead admin-intro">Les sorties en haut de la liste s’affichent en premier sur le site et dans « Dernières sorties ».</p>
             <button class="btn btn-primary" type="button" id="new-track">+ Nouvelle sortie</button>
           </div>
+          <form id="import-form" class="form admin-panel admin-import">
+            <div>
+              <label for="import-url">Importer depuis ditto.fm</label>
+              <p class="hint">Collez le lien de votre sortie : le titre, la pochette et les liens Spotify, YouTube, Deezer… sont récupérés automatiquement.</p>
+              <div class="admin-import-row">
+                <input id="import-url" type="url" inputmode="url" placeholder="https://ditto.fm/nom-du-titre" autocomplete="off" spellcheck="false" required>
+                <button class="btn btn-primary" type="submit">Importer</button>
+              </div>
+            </div>
+            <p class="form-status" id="import-status" role="status" aria-live="polite"></p>
+          </form>
           <ol class="admin-list" id="track-list"></ol>
         </div>
 
@@ -161,7 +172,11 @@
           <div><label for="t-spotify">Spotify</label><input id="t-spotify" name="spotify" type="url" placeholder="https://…"></div>
           <div><label for="t-appleMusic">Apple Music</label><input id="t-appleMusic" name="appleMusic" type="url" placeholder="https://…"></div>
           <div><label for="t-youtube">YouTube</label><input id="t-youtube" name="youtube" type="url" placeholder="https://…"></div>
+          <div><label for="t-youtubeMusic">YouTube Music</label><input id="t-youtubeMusic" name="youtubeMusic" type="url" placeholder="https://…"></div>
           <div><label for="t-deezer">Deezer</label><input id="t-deezer" name="deezer" type="url" placeholder="https://…"></div>
+          <div><label for="t-soundcloud">SoundCloud</label><input id="t-soundcloud" name="soundcloud" type="url" placeholder="https://…"></div>
+          <div><label for="t-tidal">Tidal</label><input id="t-tidal" name="tidal" type="url" placeholder="https://…"></div>
+          <div><label for="t-amazonMusic">Amazon Music</label><input id="t-amazonMusic" name="amazonMusic" type="url" placeholder="https://…"></div>
         </div>
       </fieldset>
 
