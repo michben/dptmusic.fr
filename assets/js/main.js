@@ -170,6 +170,20 @@
     if (isFilled(images.artist)) {
       $$("[data-artist-photo]").forEach(function (img) { img.src = images.artist; });
     }
+    // Photo « À propos » : la sienne si elle existe, sinon la photo officielle.
+    var about = isFilled(images.about) ? images.about : images.artist;
+    if (isFilled(about)) {
+      $$("[data-about-photo]").forEach(function (img) { img.src = about; });
+    }
+    // Icône du site : le ?v= force les navigateurs à recharger la nouvelle icône.
+    if (isFilled(images.icon)) {
+      var version = (images.icon.split("?")[1] || "");
+      if (version) {
+        $$("link[rel='icon'], link[rel='apple-touch-icon']").forEach(function (link) {
+          link.href = link.getAttribute("href").split("?")[0] + "?" + version;
+        });
+      }
+    }
   }
 
   /* Un texte saisi dans l'admin : une ligne vide sépare deux paragraphes. */

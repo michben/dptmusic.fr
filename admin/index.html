@@ -150,7 +150,7 @@
         <div id="images-view" role="tabpanel" aria-labelledby="tab-images" hidden>
           <div class="admin-panel">
             <h2>Photo officielle</h2>
-            <p class="hint">Elle s’affiche sur l’accueil et sur la page « À propos ». Elle est recadrée en carré et compressée automatiquement.</p>
+            <p class="hint">Elle s’affiche sur l’accueil, sur la page « À propos » (sauf si vous y mettez une autre photo plus bas) et quand on partage le site. Elle est recadrée en carré et compressée automatiquement.</p>
             <div class="cover-field">
               <img id="artist-preview" src="../assets/img/artist.jpg" alt="Photo officielle actuelle" width="160" height="160">
               <div>
@@ -175,6 +175,37 @@
               </div>
             </div>
           </div>
+
+          <div class="admin-panel admin-images-more">
+            <h2>Photo de la page « À propos »</h2>
+            <p class="hint">Facultatif : une autre photo que celle de l’accueil. Tant qu’aucune n’est choisie, la page « À propos » affiche la photo officielle.</p>
+            <div class="cover-field">
+              <img id="about-preview" src="../assets/img/artist.jpg" alt="Photo actuelle de la page À propos" width="160" height="160">
+              <div>
+                <label for="i-about">Choisir une photo (JPG ou PNG)</label>
+                <input id="i-about" type="file" accept="image/jpeg,image/png,image/webp">
+                <button class="btn btn-primary" type="button" id="save-about" disabled>Enregistrer la photo</button>
+                <button class="btn btn-ghost btn-sm" type="button" id="about-reset" hidden>Revenir à la photo officielle</button>
+                <p class="form-status" id="about-status" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-panel admin-images-more">
+            <h2>Icône du site</h2>
+            <p class="hint">La petite image dans l’onglet du navigateur et sur l’écran d’accueil des téléphones. Choisissez une image carrée et simple (par exemple votre logo seul) : elle est déclinée automatiquement dans toutes les tailles.</p>
+            <div class="cover-field">
+              <img id="icon-preview" class="icon-preview" src="../assets/img/apple-touch-icon.png" alt="Icône actuelle du site" width="96" height="96">
+              <div>
+                <label for="i-icon">Choisir une icône (PNG ou JPG, carrée)</label>
+                <input id="i-icon" type="file" accept="image/png,image/jpeg,image/webp">
+                <button class="btn btn-primary" type="button" id="save-icon" disabled>Enregistrer l’icône</button>
+                <p class="form-status" id="icon-status" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </div>
+
+          <p class="hint admin-images-note">Les pochettes se changent sur chaque sortie (onglet « Sorties » → « Modifier »). L’image affichée quand on partage le site sur les réseaux est la photo officielle.</p>
         </div>
 
         <!-- Paramètres -->

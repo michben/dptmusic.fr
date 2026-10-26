@@ -55,7 +55,7 @@ Une interface d’administration est disponible à l’adresse **https://dptmusi
 - **modifier** ou **supprimer** une sortie ;
 - **changer l’ordre** des sorties (flèches ↑ ↓) ;
 - écrire les **textes du site** : slogan, page « À propos » (accroche, biographie, univers musical, influences, citation) et **mentions légales** (éditeur, responsable de publication, données personnelles) — onglet « Textes du site » ;
-- changer la **photo officielle** et le **logo** — onglet « Images » ;
+- changer la **photo officielle**, le **logo**, une **photo dédiée à la page « À propos »** (facultative) et l’**icône du site** (onglet du navigateur, écran d’accueil des téléphones) — onglet « Images » ;
 - modifier le lien **Écouter**, l’**e-mail**, **Formspree** et les **réseaux sociaux** (onglet « Liens et contact »).
 
 Dans les textes, une **ligne vide sépare deux paragraphes**, et un champ laissé vide masque le bloc correspondant sur le site.
@@ -220,7 +220,8 @@ Le plus simple est de tout saisir depuis l’espace admin (`/admin/`). Les texte
 | Biographie courte, biographie longue, univers musical, influences, citation | `/admin/` onglet « Textes du site » (ou `assets/data/site.json`, clé `about`) |
 | Photo officielle | `/admin/` onglet « Images » (ou remplacer `assets/img/artist.jpg`, carré 1200 × 1200 px) |
 | Logo | `/admin/` onglet « Images » (ou remplacer `assets/img/logo.png`, PNG transparent) |
-| Favicon | remplacer `assets/img/favicon.svg`, `favicon-32.png` et `apple-touch-icon.png` (180 × 180) |
+| Photo de la page « À propos » | `/admin/` onglet « Images » (facultatif : sinon la photo officielle s’affiche) |
+| Favicon (icône du site) | `/admin/` onglet « Images » : une image carrée suffit, les tailles 32 px, 180 px et SVG sont créées automatiquement |
 | Pochettes | `assets/img/covers/` (la pochette actuelle de « DPT » est provisoire) |
 | Morceaux | `assets/data/tracks.json` |
 | Liens Spotify, Apple Music, YouTube, Deezer, Instagram, TikTok… | `assets/data/site.json` et `tracks.json` |

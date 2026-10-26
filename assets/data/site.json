@@ -14,13 +14,13 @@
     "x": "",
     "facebook": ""
   },
-
-  "_aide_images": "Photo officielle et logo. L'admin remplace les fichiers et ajoute ?v=… pour que les visiteurs voient tout de suite la nouvelle image.",
+  "_aide_images": "Photo officielle, logo, photo de la page « À propos » (vide = photo officielle) et icône du site. L'admin remplace les fichiers et ajoute ?v=… pour que les visiteurs voient tout de suite la nouvelle image.",
   "images": {
     "artist": "assets/img/artist.jpg",
-    "logo": "assets/img/logo.png"
+    "logo": "assets/img/logo.png",
+    "about": "",
+    "icon": ""
   },
-
   "_aide_about": "Textes de la page « À propos ». Laissez une ligne vide entre deux paragraphes : chaque paragraphe s'affiche séparément. Un texte vide masque le bloc.",
   "about": {
     "intro": "",
@@ -29,7 +29,6 @@
     "influences": "",
     "quote": ""
   },
-
   "_aide_legal": "Textes de la page « Mentions légales ». Un texte vide masque le bloc.",
   "legal": {
     "publisher": "",
