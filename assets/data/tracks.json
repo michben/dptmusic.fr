@@ -11,12 +11,13 @@
       "spotify": "",
       "appleMusic": "",
       "youtube": "",
-      "deezer": "https://connect.deezer.com/oauth/auth.php",
-      "tidal": "https://login.tidal.com/authorize/",
-      "soundcloud": "https://secure.soundcloud.com/authorize",
-      "amazonMusic": "https://www.amazon.com/ap/oa",
-      "anghami": "https://anghami.com/login"
-    }
+      "deezer": "",
+      "tidal": "",
+      "soundcloud": "",
+      "amazonMusic": "",
+      "anghami": ""
+    },
+    "upcoming": true
   },
   {
     "id": "le-magasin-des-mirages",
@@ -30,12 +31,13 @@
       "spotify": "",
       "appleMusic": "",
       "youtube": "",
-      "deezer": "https://connect.deezer.com/oauth/auth.php",
-      "tidal": "https://login.tidal.com/authorize/",
-      "soundcloud": "https://secure.soundcloud.com/authorize",
-      "amazonMusic": "https://www.amazon.com/ap/oa",
-      "anghami": "https://anghami.com/login"
-    }
+      "deezer": "",
+      "tidal": "",
+      "soundcloud": "",
+      "amazonMusic": "",
+      "anghami": ""
+    },
+    "upcoming": true
   },
   {
     "id": "ou-est-tu",

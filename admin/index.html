@@ -10,9 +10,9 @@
   <title>Admin — DPT</title>
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
-  <link rel="stylesheet" href="../assets/css/style.css?v=5">
-  <link rel="stylesheet" href="admin.css?v=5">
-  <script src="admin.js?v=5" defer></script>
+  <link rel="stylesheet" href="../assets/css/style.css?v=6">
+  <link rel="stylesheet" href="admin.css?v=6">
+  <script src="admin.js?v=6" defer></script>
   <script src="duels.js?v=1" defer></script>
 </head>
 <body>
@@ -280,9 +280,11 @@
         <div>
           <label for="t-releaseDate">Date de sortie</label>
           <input id="t-releaseDate" name="releaseDate" type="text" inputmode="numeric" placeholder="AAAA-MM-JJ ou AAAA" pattern="\d{4}(-\d{2}-\d{2})?">
-          <p class="hint" id="release-hint">Date complète (AAAA-MM-JJ) encore à venir : la sortie passe en « À venir » avec un compte à rebours. Sinon elle est marquée « En écoute ».</p>
+          <p class="hint" id="release-hint">Date complète (AAAA-MM-JJ) encore à venir : la sortie passe en « À venir » avec un compte à rebours. Le jour J, elle passe toute seule en « En écoute ».</p>
         </div>
       </div>
+      <label class="check"><input type="checkbox" id="t-upcoming"> Pas encore sortie (affichée « À venir », sans liens d’écoute)</label>
+      <p class="hint">À cocher si la date n’est pas encore connue. Avec une date, c’est elle qui décide.</p>
       <div>
         <label for="t-artist">Artiste(s)</label>
         <input id="t-artist" name="artist" type="text" placeholder="DPT">

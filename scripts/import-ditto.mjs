@@ -120,9 +120,17 @@ function collectUrls(value, out = []) {
   return out;
 }
 
+/* Sur une page de pré-sauvegarde (morceau pas encore sorti), ditto.fm ne donne
+   pas de liens d'écoute mais des pages de connexion aux plateformes. */
+function isPresaveLink(url) {
+  return /^(login|connect|secure|accounts)\./i.test(url.hostname)
+    || /\/(oauth|authorize|login|ap\/oa)(\/|\.php|$)/i.test(url.pathname);
+}
+
 function platformOf(rawUrl) {
   let url;
   try { url = new URL(rawUrl); } catch { return null; }
+  if (isPresaveLink(url)) return { presave: true };
   const platform = PLATFORMS.find((p) => hostMatches(url.hostname, p.hosts));
   if (!platform) return null;
   // Nettoyage : https, sans paramètres de suivi.
@@ -148,9 +156,11 @@ export function parseDittoPage(html) {
   const releaseDate = (dateRaw.match(/^\d{4}(-\d{2}-\d{2})?/) || [""])[0];
 
   const platforms = {};
+  let presaveLinks = 0;
   const add = (raw) => {
     const p = platformOf(raw);
-    if (p && !platforms[p.key]) platforms[p.key] = p.url;
+    if (p && p.presave) presaveLinks++;
+    else if (p && !platforms[p.key]) platforms[p.key] = p.url;
   };
 
   const hrefs = (html.match(/\bhref\s*=\s*"[^"]*"|\bhref\s*=\s*'[^']*'/gi) || [])
@@ -169,7 +179,9 @@ export function parseDittoPage(html) {
     }
   }
 
-  return { title, image, artist, releaseDate, platforms, smartLinks };
+  // Page de pré-sauvegarde sans aucun lien d'écoute : le morceau n'est pas encore sorti.
+  const upcoming = presaveLinks > 0 && Object.keys(platforms).length === 0;
+  return { title, image, artist, releaseDate, platforms, smartLinks, upcoming };
 }
 
 async function fetchPage(url) {
@@ -230,6 +242,7 @@ async function main() {
     log("pochette :", page.image || "(aucune)");
     log("liens feature.fm décodés :", page.smartLinks);
     log("plateformes :", JSON.stringify(page.platforms, null, 2));
+    if (page.upcoming) log("page de pré-sauvegarde : sortie marquée « À venir »");
     if (!page.title) throw new Error("Impossible de trouver le titre sur la page ditto.fm.");
 
     const tracks = JSON.parse(await readFile(TRACKS_PATH, "utf8"));
@@ -257,6 +270,14 @@ async function main() {
       mainLink: url,
       platforms: Object.assign({ spotify: "", appleMusic: "", youtube: "", deezer: "" }, old && old.platforms, page.platforms)
     };
+    // Pas encore sorti : on retire les anciens liens de connexion éventuels et on
+    // marque la sortie « À venir ». Une fois sortie, un nouvel import retire la marque.
+    if (page.upcoming) {
+      track.upcoming = true;
+      Object.keys(track.platforms).forEach((k) => {
+        try { if (isPresaveLink(new URL(track.platforms[k]))) track.platforms[k] = ""; } catch { /* lien vide */ }
+      });
+    }
 
     const warnings = [];
     if (page.image) {

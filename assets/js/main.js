@@ -299,19 +299,21 @@
   var MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin",
     "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
-  /* Statut d'une sortie, uniquement d'après la date saisie (rien n'est deviné) :
+  /* Statut d'une sortie, uniquement d'après les données saisies (rien n'est deviné) :
      - date complète AAAA-MM-JJ encore à venir  -> « À venir » + compte à rebours ;
-     - tout le reste (date passée, année seule, date vide) -> « En écoute ». */
+     - case « Pas encore sorti » cochée (upcoming) sans date passée -> « À venir », sans compte à rebours ;
+     - tout le reste -> « En écoute ». Une date passée l'emporte toujours. */
   function releaseInfo(track) {
     var raw = String(track.releaseDate || "").trim();
     var parts = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!parts) return { status: "out", date: null, text: "" };
+    var date = parts ? new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 0, 0, 0) : null;
+    if (date && isNaN(date.getTime())) date = null;
 
-    var date = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 0, 0, 0);
-    if (isNaN(date.getTime())) return { status: "out", date: null, text: "" };
-
-    var text = Number(parts[3]) + " " + MONTHS[Number(parts[2]) - 1] + " " + parts[1];
-    return { status: date.getTime() > Date.now() ? "soon" : "out", date: date, text: text };
+    if (date) {
+      var text = Number(parts[3]) + " " + MONTHS[Number(parts[2]) - 1] + " " + parts[1];
+      return { status: date.getTime() > Date.now() ? "soon" : "out", date: date, text: text };
+    }
+    return { status: track.upcoming === true ? "soon" : "out", date: null, text: "" };
   }
 
   /* « 3 j 04 h 12 min 07 s » — recalculé chaque seconde. */
@@ -375,14 +377,13 @@
     }, { once: true });
 
     var coverBox = el("div", { "class": "track-cover" }, [
-      // Disque vinyle qui dépasse de la pochette et tourne.
-      el("span", { "class": "vinyl vinyl-sm", "aria-hidden": "true" }),
       img,
       type ? el("span", { "class": "track-type", text: type }) : null,
       el("span", { "class": "track-status" + (soon ? " is-soon" : ""), text: STATUS_LABELS[release.status] })
     ]);
 
-    var meta = [artist, soon ? "Sortie le " + release.text : year].filter(Boolean).join(" · ");
+    var when = release.date ? "Sortie le " + release.text : "Date de sortie bientôt annoncée";
+    var meta = [artist, soon ? when : year].filter(Boolean).join(" · ");
     var head = el("div", {}, [
       el("h3", { "class": "track-title", text: title }),
       el("p", { "class": "track-meta", text: meta })
@@ -390,7 +391,7 @@
 
     // Compte à rebours jusqu'à la sortie (uniquement pour les morceaux à venir).
     var countdown = null;
-    if (soon) {
+    if (soon && release.date) {
       countdown = el("p", { "class": "countdown" }, [
         el("span", { "class": "countdown-label", text: "Disponible dans" }),
         el("time", {
@@ -412,8 +413,9 @@
     }
 
     // Plateformes : le nom est affiché à côté de l'icône.
+    // Un morceau pas encore sorti n'a pas encore de liens d'écoute à montrer.
     var platforms = el("ul", { "class": "platforms", "aria-label": "Plateformes d'écoute" });
-    Object.keys(TRACK_PLATFORMS).forEach(function (key) {
+    if (!soon) Object.keys(TRACK_PLATFORMS).forEach(function (key) {
       var url = track.platforms && track.platforms[key];
       if (!isFilled(url)) return; // lien vide = bouton masqué
       var label = TRACK_PLATFORMS[key];
@@ -446,8 +448,11 @@
 
   /* Les sorties à venir, de la plus proche à la plus lointaine. */
   function upcomingTracks(tracks) {
+    // Les sorties sans date passent après celles qui ont un compte à rebours.
     return tracks.filter(isSoon).sort(function (a, b) {
-      return releaseInfo(a).date - releaseInfo(b).date;
+      var da = releaseInfo(a).date, db = releaseInfo(b).date;
+      if (da && db) return da - db;
+      return da ? -1 : db ? 1 : 0;
     });
   }
 

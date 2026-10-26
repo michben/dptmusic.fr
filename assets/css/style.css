@@ -694,22 +694,6 @@ blockquote.signature {
 }
 .hero-vinyl .vinyl { position: relative; width: 100%; animation-duration: 9s; }
 
-/* Cartes morceaux : petit disque qui sort de la pochette au survol. */
-.vinyl-sm {
-  position: absolute;
-  z-index: 1;
-  width: 55%;
-  top: 22.5%;
-  right: 6%;
-  transform: translateX(42%);
-  opacity: 0;
-  transition: transform .45s var(--ease), opacity .35s var(--ease);
-  animation-duration: 4s;
-}
-.track-card:hover .vinyl-sm,
-.track-card:focus-within .vinyl-sm { transform: translateX(0); opacity: .96; }
-.track-card.is-soon .vinyl-sm { animation-duration: 12s; }
-
 @media (max-width: 860px) {
   /* Sur mobile la photo est collée à gauche : le disque passe à droite. */
   .hero-vinyl { width: 42%; left: auto; right: -4%; bottom: 6%; }

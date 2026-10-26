@@ -167,7 +167,7 @@ Règles à respecter :
 - Les textes sont **entre guillemets droits** `"..."`.
 - `id` : un identifiant unique, en minuscules et sans espace (ex. `mon-titre`).
 - `releaseDate` : `AAAA-MM-JJ` ou seulement `AAAA`. Laissez `""` si inconnue : l’année ne s’affiche pas.
-  **Une date complète encore à venir** (ex. `2026-12-01`) fait passer la sortie en « À venir » : elle s’affiche dans la section « Prochaines sorties » de l’accueil, en haut de la page Musique, avec un **compte à rebours** qui se met à jour chaque seconde. Dès que la date est passée, la sortie bascule automatiquement en « En écoute ». Rien n’est deviné : sans date complète, la sortie est considérée comme déjà disponible.
+  **Une date complète encore à venir** (ex. `2026-12-01`) fait passer la sortie en « À venir » : elle s’affiche dans la section « Prochaines sorties » de l’accueil, en haut de la page Musique, avec un **compte à rebours** qui se met à jour chaque seconde. Dès que la date est passée, la sortie bascule automatiquement en « En écoute ». Rien n’est deviné : sans date complète, la sortie est considérée comme déjà disponible, sauf si `"upcoming": true` (case « Pas encore sortie » dans l’admin) — elle s’affiche alors « À venir », sans liens d’écoute ni compte à rebours, jusqu’à ce qu’une date soit saisie. L’import ditto.fm coche cette case tout seul quand la page est une page de pré-sauvegarde (aucun lien d’écoute, seulement des connexions aux plateformes).
 - `type` : `Single`, `EP`, `Album` ou `Featuring` (c’est ce qui alimente les filtres de la page Musique).
 - `cover` : chemin de la pochette. Laissez `""` pour afficher une pochette neutre.
 - `mainLink` : le lien du bouton **Écouter** (ex. lien Ditto).
@@ -236,7 +236,7 @@ Avant d’ajouter une image, compressez-la avec https://squoosh.app (gratuit, da
 
 ### Après une modification du code (CSS ou JavaScript)
 
-Les pages chargent `style.css`, `main.js`, `admin.js`… avec un numéro de version (`?v=5`). Si vous modifiez l’un de ces fichiers, augmentez ce numéro dans les pages HTML (`?v=6`) : sinon les navigateurs peuvent garder l’ancienne version en mémoire et les nouveaux boutons ne répondent pas.
+Les pages chargent `style.css`, `main.js`, `admin.js`… avec un numéro de version (`?v=6`). Si vous modifiez l’un de ces fichiers, augmentez ce numéro dans les pages HTML (`?v=7`) : sinon les navigateurs peuvent garder l’ancienne version en mémoire et les nouveaux boutons ne répondent pas.
 
 ### Changer les couleurs
 
