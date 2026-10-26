@@ -272,7 +272,7 @@
     });
     actions.appendChild(platforms);
 
-    var card = el("article", { "class": "track-card", "data-type": typeKey(track) }, [
+    var card = el("article", { "class": "track-card", "data-type": typeKey(track), "data-id": track.id }, [
       coverBox,
       el("div", { "class": "track-body" }, [head, actions])
     ]);
