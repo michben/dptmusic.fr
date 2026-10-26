@@ -1,5 +1,24 @@
 [
   {
+    "id": "personne-ne-dort",
+    "title": "Personne Ne Dort",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/personne-ne-dort.jpg?v=mvpbebze",
+    "mainLink": "https://ditto.fm/personne-ne-dort",
+    "platforms": {
+      "spotify": "",
+      "appleMusic": "",
+      "youtube": "",
+      "deezer": "https://connect.deezer.com/oauth/auth.php",
+      "tidal": "https://login.tidal.com/authorize/",
+      "soundcloud": "https://secure.soundcloud.com/authorize",
+      "amazonMusic": "https://www.amazon.com/ap/oa",
+      "anghami": "https://anghami.com/login"
+    }
+  },
+  {
     "id": "le-magasin-des-mirages",
     "title": "Le Magasin Des Mirages",
     "artist": "DPT",
