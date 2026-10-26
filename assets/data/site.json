@@ -1,14 +1,9 @@
 {
   "_aide": "Paramètres généraux du site. Laissez une valeur vide (\"\") pour masquer l'élément correspondant. Voir README.md.",
-
   "tagline": "",
-
   "listenLink": "https://ditto.fm/dpt-dpt",
-
-  "email": "",
-
+  "email": "bonjour@dptmusic.fr",
   "formspreeId": "",
-
   "socials": {
     "spotify": "",
     "appleMusic": "",
