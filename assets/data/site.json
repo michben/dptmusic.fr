@@ -13,5 +13,9 @@
     "tiktok": "",
     "x": "",
     "facebook": ""
+  },
+  "votes": {
+    "api": "https://dpt-votes.dptmusic-wb61f.workers.dev",
+    "turnstileSiteKey": "0x4AAAAAAFmuXcCfOFkQG3AQ"
   }
 }
