@@ -1,5 +1,24 @@
 [
   {
+    "id": "le-magasin-des-mirages",
+    "title": "Le Magasin Des Mirages",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/le-magasin-des-mirages.jpg?v=mvpbdxz5",
+    "mainLink": "https://ditto.fm/le-magasin-des-mirages",
+    "platforms": {
+      "spotify": "",
+      "appleMusic": "",
+      "youtube": "",
+      "deezer": "https://connect.deezer.com/oauth/auth.php",
+      "tidal": "https://login.tidal.com/authorize/",
+      "soundcloud": "https://secure.soundcloud.com/authorize",
+      "amazonMusic": "https://www.amazon.com/ap/oa",
+      "anghami": "https://anghami.com/login"
+    }
+  },
+  {
     "id": "ou-est-tu",
     "title": "ou est tu ?",
     "artist": "DPT",

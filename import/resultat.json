@@ -1,21 +1,16 @@
 {
-  "requestId": "mvpbbj0b-1t3sv3",
-  "url": "https://ditto.fm/ou-est-tu",
+  "requestId": "mvpbdoyk-v7b437",
+  "url": "https://ditto.fm/le-magasin-des-mirages",
   "status": "ok",
-  "message": "« ou est tu ? » a été ajoutée avec 10 plateformes.",
-  "trackId": "ou-est-tu",
-  "title": "ou est tu ?",
+  "message": "« Le Magasin Des Mirages » a été ajoutée avec 5 plateformes.",
+  "trackId": "le-magasin-des-mirages",
+  "title": "Le Magasin Des Mirages",
   "platforms": [
-    "spotify",
-    "youtube",
     "deezer",
     "tidal",
     "soundcloud",
     "amazonMusic",
-    "anghami",
-    "youtubeMusic",
-    "kkbox",
-    "iheart"
+    "anghami"
   ],
-  "finishedAt": "2026-10-26T13:49:01.579Z"
+  "finishedAt": "2026-10-26T13:50:43.266Z"
 }
