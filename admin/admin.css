@@ -120,3 +120,23 @@ code { padding: .1rem .35rem; background: var(--bg-raised); border-radius: 4px; 
 
 .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .75rem; }
 .admin-intro { margin: 0; }
+
+/* --- Onglet « Images » ---------------------------------------------------- */
+.admin-images-logo { margin-top: 1.5rem; }
+#images-view h2 { font-size: 1.4rem; }
+#images-view .cover-field > div { display: grid; gap: .6rem; }
+#images-view .btn { justify-self: start; }
+.btn:disabled { opacity: .45; cursor: default; }
+.cover-field img.logo-preview {
+  width: 160px;
+  height: auto;
+  object-fit: contain;
+  padding: .75rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+/* Les textes longs : un champ par ligne dans les blocs « À propos » et « Mentions légales ». */
+#texts-view fieldset { display: grid; gap: 1rem; margin-top: 1rem; }
+#texts-view textarea { min-height: 0; }

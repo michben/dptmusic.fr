@@ -42,8 +42,8 @@
   <header class="site-header">
     <div class="container">
       <a class="brand" href="index.html" aria-label="DPT — Accueil">
-        <!-- LOGO : remplacez assets/img/logo.png par le logo officiel (PNG transparent, environ 600 px de large) -->
-        <img src="assets/img/logo.png" alt="DPT" width="413" height="166">
+        <!-- LOGO : à changer depuis /admin/ (onglet « Images »), ou en remplaçant assets/img/logo.png -->
+        <img src="assets/img/logo.png" alt="DPT" width="413" height="166" data-logo>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu"><span></span></button>
       <nav id="site-nav" class="nav" aria-label="Navigation principale">
@@ -72,9 +72,26 @@
           <ul class="socials reveal reveal-3" data-socials aria-label="DPT sur les réseaux"></ul>
         </div>
         <div class="hero-media reveal reveal-2">
-          <!-- PHOTO OFFICIELLE : remplacez assets/img/artist.jpg (format carré conseillé, 1200 × 1200 px, moins de 300 Ko) -->
-          <img src="assets/img/artist.jpg" alt="Portrait de l’artiste DPT" width="1200" height="1200" fetchpriority="high">
+          <div class="hero-photo">
+            <!-- PHOTO OFFICIELLE : à changer depuis /admin/ (onglet « Images »), ou en remplaçant assets/img/artist.jpg -->
+            <img src="assets/img/artist.jpg" alt="Portrait de l’artiste DPT" width="1200" height="1200" fetchpriority="high" data-artist-photo>
+          </div>
+          <div class="hero-vinyl" aria-hidden="true"><span class="vinyl"></span></div>
         </div>
+      </div>
+    </section>
+
+    <!-- Prochaines sorties : cette section apparaît dès qu'une sortie a une date
+         à venir (AAAA-MM-JJ) dans assets/data/tracks.json, avec son compte à rebours. -->
+    <section class="section" aria-labelledby="upcoming-title" data-block hidden>
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Bientôt</span>
+            <h2 id="upcoming-title">Prochaines sorties</h2>
+          </div>
+        </div>
+        <div class="tracks-grid" data-upcoming aria-live="polite"></div>
       </div>
     </section>
 

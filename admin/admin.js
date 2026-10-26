@@ -21,7 +21,11 @@
     importResultPath: "import/resultat.json",
     importTimeout: 180000, // on attend la fin de l'import 3 minutes au plus
     coverSize: 800,      // pochettes enregistrées en 800 × 800 px
-    coverQuality: 0.82   // qualité JPEG
+    coverQuality: 0.82,  // qualité JPEG
+    artistPath: "assets/img/artist.jpg",  // photo officielle (accueil + à propos)
+    artistSize: 1200,    // photo enregistrée en 1200 × 1200 px
+    logoPath: "assets/img/logo.png",      // logo de l'en-tête
+    logoWidth: 900       // largeur maximale du logo, hauteur proportionnelle
   };
 
   var TOKEN_KEY = "dpt-admin-token";
@@ -37,6 +41,19 @@
     facebook: "Facebook"
   };
 
+  /* Textes de la page « À propos » et des mentions légales : identifiant du
+     champ dans l'admin -> emplacement dans site.json. */
+  var TEXTS = {
+    "p-about-intro": ["about", "intro"],
+    "p-about-bio": ["about", "bio"],
+    "p-about-universe": ["about", "universe"],
+    "p-about-influences": ["about", "influences"],
+    "p-about-quote": ["about", "quote"],
+    "p-legal-publisher": ["legal", "publisher"],
+    "p-legal-manager": ["legal", "manager"],
+    "p-legal-privacy": ["legal", "privacy"]
+  };
+
   var state = {
     token: "",
     tracks: [],
@@ -45,6 +62,8 @@
     siteSha: null,
     editingIndex: -1,  // -1 = nouvelle sortie
     coverData: null,   // pochette choisie (data URL JPEG)
+    artistData: null,  // photo officielle choisie (data URL JPEG)
+    logoData: null,    // logo choisi (data URL PNG)
     previews: {}       // id -> data URL, pour afficher une pochette avant la mise en ligne
   };
 
@@ -193,6 +212,14 @@
   /* Liste des sorties                                                       */
   /* ---------------------------------------------------------------------- */
 
+  /* Même règle que le site : une date complète encore à venir = sortie à venir. */
+  function isUpcoming(track) {
+    var parts = String(track.releaseDate || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!parts) return false;
+    var date = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 0, 0, 0);
+    return !isNaN(date.getTime()) && date.getTime() > Date.now();
+  }
+
   function coverSrc(track) {
     if (state.previews[track.id]) return state.previews[track.id];
     return track.cover ? "../" + track.cover : "../assets/img/covers/placeholder.jpg";
@@ -236,7 +263,8 @@
       var title = document.createElement("strong");
       title.textContent = track.title || "Sans titre";
       var meta = document.createElement("span");
-      meta.textContent = [track.type, track.releaseDate].filter(Boolean).join(" · ");
+      meta.textContent = [track.type, track.releaseDate, isUpcoming(track) ? "À venir" : "En écoute"]
+        .filter(Boolean).join(" · ");
       info.appendChild(title);
       info.appendChild(meta);
 
@@ -353,26 +381,43 @@
     $("t-title").focus();
   }
 
-  /* Recadre l'image en carré, la redimensionne et la compresse en JPEG. */
-  function processCover(file) {
+  /* Prépare une image dans le navigateur avant de l'envoyer.
+     - mode "square" : recadrée au centre en carré, enregistrée en JPEG (pochettes, photo) ;
+     - mode "fit"    : forme d'origine conservée, enregistrée en PNG (logo transparent). */
+  function processImage(file, options) {
     return new Promise(function (resolve, reject) {
       var url = URL.createObjectURL(file);
       var img = new Image();
       img.onload = function () {
-        var side = Math.min(img.naturalWidth, img.naturalHeight);
-        var size = Math.min(CONFIG.coverSize, side);
         var canvas = document.createElement("canvas");
+        var ctx;
+        if (options.mode === "fit") {
+          var scale = Math.min(1, options.maxWidth / img.naturalWidth);
+          canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/png"));
+          return;
+        }
+        var side = Math.min(img.naturalWidth, img.naturalHeight);
+        var size = Math.min(options.size, side);
         canvas.width = canvas.height = size;
-        var ctx = canvas.getContext("2d");
+        ctx = canvas.getContext("2d");
         ctx.fillStyle = "#0b0b0d";
         ctx.fillRect(0, 0, size, size);
         ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", CONFIG.coverQuality));
+        resolve(canvas.toDataURL("image/jpeg", options.quality || CONFIG.coverQuality));
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Image illisible.")); };
       img.src = url;
     });
+  }
+
+  function processCover(file) {
+    return processImage(file, { mode: "square", size: CONFIG.coverSize });
   }
 
   function uploadCover(id, dataUrl) {
@@ -532,37 +577,129 @@
     var s = state.site;
     ["tagline", "listenLink", "email", "formspreeId"].forEach(function (k) { $("s-" + k).value = s[k] || ""; });
     Object.keys(SOCIALS).forEach(function (k) { $("s-social-" + k).value = (s.socials && s.socials[k]) || ""; });
+    Object.keys(TEXTS).forEach(function (id) {
+      var place = TEXTS[id];
+      $(id).value = (s[place[0]] && s[place[0]][place[1]]) || "";
+    });
+    fillImages();
+  }
+
+  /* Copie modifiable de site.json : les champs qu'on ne touche pas sont conservés. */
+  function siteCopy() { return JSON.parse(JSON.stringify(state.site)); }
+
+  function saveSite(site, message, status, done) {
+    setBusy(true);
+    if (status) status.textContent = "Publication…";
+    return writeJSON(CONFIG.sitePath, site, state.siteSha, message)
+      .then(function (sha) {
+        state.site = site;
+        state.siteSha = sha;
+        if (status) status.textContent = "";
+        flash(done);
+      })
+      .catch(function (err) {
+        var text = explain(err);
+        if (status) status.textContent = text; else flash(text, true);
+      })
+      .then(function () { setBusy(false); });
   }
 
   function submitSettings(e) {
     e.preventDefault();
     if (!$("settings-form").reportValidity()) return;
-    var site = JSON.parse(JSON.stringify(state.site)); // conserve les autres champs (ex. _aide)
-    ["tagline", "listenLink", "email", "formspreeId"].forEach(function (k) { site[k] = $("s-" + k).value.trim(); });
+    var site = siteCopy();
+    ["listenLink", "email", "formspreeId"].forEach(function (k) { site[k] = $("s-" + k).value.trim(); });
     site.socials = site.socials || {};
     Object.keys(SOCIALS).forEach(function (k) { site.socials[k] = $("s-social-" + k).value.trim(); });
+    saveSite(site, "Admin : mise à jour des liens et du contact", null,
+      "Liens et contact enregistrés. Le site sera à jour d’ici 1 à 2 minutes.");
+  }
 
+  /* ---------------------------------------------------------------------- */
+  /* Textes du site (slogan, à propos, mentions légales)                     */
+  /* ---------------------------------------------------------------------- */
+
+  function submitTexts(e) {
+    e.preventDefault();
+    var site = siteCopy();
+    site.tagline = $("s-tagline").value.trim();
+    Object.keys(TEXTS).forEach(function (id) {
+      var place = TEXTS[id];
+      site[place[0]] = site[place[0]] || {};
+      site[place[0]][place[1]] = $(id).value.trim();
+    });
+    saveSite(site, "Admin : mise à jour des textes du site", $("texts-status"),
+      "Textes enregistrés. Le site sera à jour d’ici 1 à 2 minutes.");
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Images (photo officielle et logo)                                       */
+  /* ---------------------------------------------------------------------- */
+
+  /* Le ?v= change à chaque enregistrement : les visiteurs voient la nouvelle
+     image tout de suite, sans vider le cache de leur navigateur. */
+  function imagePath(path) { return path + "?v=" + Date.now().toString(36); }
+
+  function currentImage(key, fallback) {
+    var value = state.site.images && state.site.images[key];
+    return "../" + (value || fallback);
+  }
+
+  function fillImages() {
+    $("artist-preview").src = state.artistData || currentImage("artist", CONFIG.artistPath);
+    $("logo-preview").src = state.logoData || currentImage("logo", CONFIG.logoPath);
+  }
+
+  /* Remplace le fichier image dans le dépôt, puis note son nouveau ?v= dans site.json. */
+  function saveImage(key, path, dataUrl, status, done) {
     setBusy(true);
-    writeJSON(CONFIG.sitePath, site, state.siteSha, "Admin : mise à jour des liens et du contact")
-      .then(function (sha) {
+    status.textContent = "Envoi de l’image…";
+    getFile(path, true).then(function (existing) {
+      return putFile(path, dataUrl.split(",")[1], existing && existing.sha, "Admin : mise à jour de " + path);
+    }).then(function () {
+      var site = siteCopy();
+      site.images = site.images || {};
+      site.images[key] = imagePath(path);
+      return writeJSON(CONFIG.sitePath, site, state.siteSha, "Admin : nouvelle image du site").then(function (sha) {
         state.site = site;
         state.siteSha = sha;
-        flash("Liens et contact enregistrés. Le site sera à jour d’ici 1 à 2 minutes.");
-      })
-      .catch(function (err) { flash(explain(err), true); })
-      .then(function () { setBusy(false); });
+      });
+    }).then(function () {
+      status.textContent = "";
+      flash(done);
+    }).catch(function (err) {
+      status.textContent = explain(err);
+    }).then(function () { setBusy(false); });
+  }
+
+  /* Prépare une image choisie : aperçu immédiat, bouton d'enregistrement actif. */
+  function watchImageField(inputId, buttonId, previewId, statusId, options, store) {
+    $(inputId).addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      $(statusId).textContent = "Préparation de l’image…";
+      processImage(file, options).then(function (data) {
+        store(data);
+        $(previewId).src = data;
+        $(buttonId).disabled = false;
+        $(statusId).textContent = "Cliquez sur « Enregistrer » pour publier cette image.";
+      }).catch(function (err) {
+        $(statusId).textContent = err.message;
+      });
+    });
   }
 
   /* ---------------------------------------------------------------------- */
   /* Démarrage                                                               */
   /* ---------------------------------------------------------------------- */
 
+  var TABS = ["tracks", "texts", "images", "settings"];
+
   function selectTab(name) {
-    var tracks = name === "tracks";
-    $("tab-tracks").setAttribute("aria-selected", String(tracks));
-    $("tab-settings").setAttribute("aria-selected", String(!tracks));
-    $("tracks-view").hidden = !tracks;
-    $("settings-view").hidden = tracks;
+    TABS.forEach(function (tab) {
+      $("tab-" + tab).setAttribute("aria-selected", String(tab === name));
+      $(tab + "-view").hidden = tab !== name;
+    });
   }
 
   /* Toute erreur inattendue s'affiche en haut de la page plutôt que de bloquer l'admin en silence. */
@@ -603,8 +740,27 @@
       show("login");
     });
 
-    $("tab-tracks").addEventListener("click", function () { selectTab("tracks"); });
-    $("tab-settings").addEventListener("click", function () { selectTab("settings"); });
+    TABS.forEach(function (tab) {
+      $("tab-" + tab).addEventListener("click", function () { selectTab(tab); });
+    });
+
+    $("texts-form").addEventListener("submit", submitTexts);
+
+    watchImageField("i-artist", "save-artist", "artist-preview", "artist-status",
+      { mode: "square", size: CONFIG.artistSize }, function (data) { state.artistData = data; });
+    watchImageField("i-logo", "save-logo", "logo-preview", "logo-status",
+      { mode: "fit", maxWidth: CONFIG.logoWidth }, function (data) { state.logoData = data; });
+
+    $("save-artist").addEventListener("click", function () {
+      if (!state.artistData) return;
+      saveImage("artist", CONFIG.artistPath, state.artistData, $("artist-status"),
+        "Nouvelle photo officielle enregistrée. Le site sera à jour d’ici 1 à 2 minutes.");
+    });
+    $("save-logo").addEventListener("click", function () {
+      if (!state.logoData) return;
+      saveImage("logo", CONFIG.logoPath, state.logoData, $("logo-status"),
+        "Nouveau logo enregistré. Le site sera à jour d’ici 1 à 2 minutes.");
+    });
 
     $("new-track").addEventListener("click", function () { openForm(-1); });
     $("track-cancel").addEventListener("click", function () { closeDialog($("track-dialog")); });

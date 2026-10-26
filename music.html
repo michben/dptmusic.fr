@@ -42,8 +42,8 @@
   <header class="site-header">
     <div class="container">
       <a class="brand" href="index.html" aria-label="DPT — Accueil">
-        <!-- LOGO : remplacez assets/img/logo.png par le logo officiel (PNG transparent, environ 600 px de large) -->
-        <img src="assets/img/logo.png" alt="DPT" width="413" height="166">
+        <!-- LOGO : à changer depuis /admin/ (onglet « Images »), ou en remplaçant assets/img/logo.png -->
+        <img src="assets/img/logo.png" alt="DPT" width="413" height="166" data-logo>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu"><span></span></button>
       <nav id="site-nav" class="nav" aria-label="Navigation principale">
@@ -69,8 +69,10 @@
     <section class="section" style="padding-top:1rem" aria-label="Liste des morceaux">
       <div class="container">
         <div class="toolbar">
-          <div class="filters" role="group" aria-label="Filtrer par type de sortie">
+          <div class="filters" role="group" aria-label="Filtrer les sorties">
             <button class="filter-btn" type="button" data-filter="all" aria-pressed="true">Tous</button>
+            <button class="filter-btn" type="button" data-filter="out" aria-pressed="false">En écoute</button>
+            <button class="filter-btn" type="button" data-filter="soon" aria-pressed="false">À venir</button>
             <button class="filter-btn" type="button" data-filter="single" aria-pressed="false">Singles</button>
             <button class="filter-btn" type="button" data-filter="ep" aria-pressed="false">EP</button>
             <button class="filter-btn" type="button" data-filter="album" aria-pressed="false">Albums</button>

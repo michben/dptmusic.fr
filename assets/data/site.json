@@ -1,5 +1,5 @@
 {
-  "_aide": "Paramètres généraux du site. Laissez une valeur vide (\"\") pour masquer l'élément correspondant. Voir README.md.",
+  "_aide": "Paramètres généraux du site. Laissez une valeur vide (\"\") pour masquer l'élément correspondant. Tout se modifie aussi depuis /admin/. Voir README.md.",
 
   "tagline": "",
 
@@ -18,5 +18,27 @@
     "tiktok": "",
     "x": "",
     "facebook": ""
+  },
+
+  "_aide_images": "Photo officielle et logo. L'admin remplace les fichiers et ajoute ?v=… pour que les visiteurs voient tout de suite la nouvelle image.",
+  "images": {
+    "artist": "assets/img/artist.jpg",
+    "logo": "assets/img/logo.png"
+  },
+
+  "_aide_about": "Textes de la page « À propos ». Laissez une ligne vide entre deux paragraphes : chaque paragraphe s'affiche séparément. Un texte vide masque le bloc.",
+  "about": {
+    "intro": "",
+    "bio": "",
+    "universe": "",
+    "influences": "",
+    "quote": ""
+  },
+
+  "_aide_legal": "Textes de la page « Mentions légales ». Un texte vide masque le bloc.",
+  "legal": {
+    "publisher": "",
+    "manager": "",
+    "privacy": ""
   }
 }
