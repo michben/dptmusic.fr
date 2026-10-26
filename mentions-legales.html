@@ -42,8 +42,8 @@
   <header class="site-header">
     <div class="container">
       <a class="brand" href="index.html" aria-label="DPT — Accueil">
-        <!-- LOGO : remplacez assets/img/logo.png par le logo officiel (PNG transparent, environ 600 px de large) -->
-        <img src="assets/img/logo.png" alt="DPT" width="413" height="166">
+        <!-- LOGO : à changer depuis /admin/ (onglet « Images »), ou en remplaçant assets/img/logo.png -->
+        <img src="assets/img/logo.png" alt="DPT" width="413" height="166" data-logo>
       </a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu"><span></span></button>
       <nav id="site-nav" class="nav" aria-label="Navigation principale">
@@ -67,15 +67,19 @@
 
     <section class="section" style="padding-top:1rem">
       <div class="container prose">
-        <!-- ===== À COMPLÉTER : MENTIONS LÉGALES =====
+        <!-- Les textes de cette page se saisissent dans /admin/ (onglet « Textes du site »).
              En France, un site doit indiquer au minimum l'éditeur, le responsable de publication
-             et l'hébergeur. Remplacez chaque bloc <p class="placeholder"> par les vraies informations. -->
+             et l'hébergeur. Un texte vide masque le bloc. -->
 
-        <h2>Éditeur du site</h2>
-        <p class="placeholder">Nom ou raison sociale, adresse, e-mail de contact (et numéro SIRET le cas échéant).</p>
+        <div data-block hidden>
+          <h2>Éditeur du site</h2>
+          <div data-legal-publisher></div>
+        </div>
 
-        <h2>Responsable de la publication</h2>
-        <p class="placeholder">Nom du responsable de la publication.</p>
+        <div data-block hidden>
+          <h2>Responsable de la publication</h2>
+          <div data-legal-manager></div>
+        </div>
 
         <h2>Hébergement</h2>
         <p>Ce site est hébergé par GitHub Pages, service de GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis.</p>
@@ -84,7 +88,7 @@
         <p>Les contenus de ce site (textes, photos, pochettes, logos, musiques) sont la propriété de DPT ou de leurs ayants droit. Toute reproduction sans autorisation est interdite.</p>
 
         <h2>Données personnelles</h2>
-        <p class="placeholder">À compléter : usage des données envoyées via le formulaire de contact (prestataire, durée de conservation, droit d’accès et de suppression).</p>
+        <div data-legal-privacy></div>
 
         <h3>Votes</h3>
         <p>Les votes (pouces sur les morceaux et page « Vote ») sont enregistrés par un service hébergé par Cloudflare, Inc. (101 Townsend Street, San Francisco, CA 94107, États-Unis). Pour les pouces, seuls un identifiant aléatoire propre à votre navigateur et une empreinte non réversible de votre adresse IP sont conservés, afin de limiter les abus. Pour voter à la page « Vote », l’inscription enregistre votre pseudo, votre adresse e-mail, votre mot de passe sous forme chiffrée et vos votes ; ces données servent uniquement aux votes et ne sont ni affichées ni partagées. La vérification anti-robot est assurée par Cloudflare Turnstile. Pour accéder à vos données ou supprimer votre compte, écrivez-nous via la page <a href="contact.html">Contact</a>.</p>

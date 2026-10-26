@@ -56,6 +56,12 @@
     amazonMusic: "Amazon Music"
   };
 
+  /* Textes des étiquettes de statut (déjà sortie / à venir). */
+  var STATUS_LABELS = {
+    out: "En écoute",
+    soon: "À venir"
+  };
+
   /* Correspondance entre le champ "type" d'un morceau et les filtres. */
   var TYPES = {
     single: "Single",
@@ -155,8 +161,73 @@
     });
   }
 
+  /* Photo officielle et logo : chemins réglés dans site.json (images). */
+  function applyImages(images) {
+    if (!images) return;
+    if (isFilled(images.logo)) {
+      $$("[data-logo]").forEach(function (img) { img.src = images.logo; });
+    }
+    if (isFilled(images.artist)) {
+      $$("[data-artist-photo]").forEach(function (img) { img.src = images.artist; });
+    }
+    // Photo « À propos » : la sienne si elle existe, sinon la photo officielle.
+    var about = isFilled(images.about) ? images.about : images.artist;
+    if (isFilled(about)) {
+      $$("[data-about-photo]").forEach(function (img) { img.src = about; });
+    }
+    // Icône du site : le ?v= force les navigateurs à recharger la nouvelle icône.
+    if (isFilled(images.icon)) {
+      var version = (images.icon.split("?")[1] || "");
+      if (version) {
+        $$("link[rel='icon'], link[rel='apple-touch-icon']").forEach(function (link) {
+          link.href = link.getAttribute("href").split("?")[0] + "?" + version;
+        });
+      }
+    }
+  }
+
+  /* Un texte saisi dans l'admin : une ligne vide sépare deux paragraphes. */
+  function fillText(selector, text) {
+    var boxes = $$(selector);
+    if (!boxes.length) return isFilled(text);
+    var paragraphs = String(text || "").split(/\n\s*\n/)
+      .map(function (p) { return p.trim(); })
+      .filter(Boolean);
+    boxes.forEach(function (box) {
+      box.innerHTML = "";
+      paragraphs.forEach(function (p) { box.appendChild(el("p", { text: p })); });
+      // Le bloc entier (titre compris) disparaît tant que le texte n'est pas renseigné.
+      var block = box.closest("[data-block]") || box;
+      block.hidden = !paragraphs.length;
+    });
+    return paragraphs.length > 0;
+  }
+
+  function applyAbout(about) {
+    about = about || {};
+    var filled = [
+      fillText("[data-about-intro]", about.intro),
+      fillText("[data-about-bio]", about.bio),
+      fillText("[data-about-universe]", about.universe),
+      fillText("[data-about-influences]", about.influences),
+      fillText("[data-about-quote]", about.quote)
+    ].some(Boolean);
+    $$("[data-if-no-about]").forEach(function (n) { n.hidden = filled; });
+  }
+
+  function applyLegal(legal) {
+    legal = legal || {};
+    fillText("[data-legal-publisher]", legal.publisher);
+    fillText("[data-legal-manager]", legal.manager);
+    fillText("[data-legal-privacy]", legal.privacy);
+  }
+
   function applySite(site) {
     if (!site) return;
+
+    applyImages(site.images);
+    applyAbout(site.about);
+    applyLegal(site.legal);
 
     if (isFilled(site.listenLink)) {
       $$("[data-listen]").forEach(function (a) { a.href = site.listenLink; });
@@ -225,12 +296,71 @@
     return m ? m[0] : "";
   }
 
+  var MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin",
+    "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+  /* Statut d'une sortie, uniquement d'après la date saisie (rien n'est deviné) :
+     - date complète AAAA-MM-JJ encore à venir  -> « À venir » + compte à rebours ;
+     - tout le reste (date passée, année seule, date vide) -> « En écoute ». */
+  function releaseInfo(track) {
+    var raw = String(track.releaseDate || "").trim();
+    var parts = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!parts) return { status: "out", date: null, text: "" };
+
+    var date = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 0, 0, 0);
+    if (isNaN(date.getTime())) return { status: "out", date: null, text: "" };
+
+    var text = Number(parts[3]) + " " + MONTHS[Number(parts[2]) - 1] + " " + parts[1];
+    return { status: date.getTime() > Date.now() ? "soon" : "out", date: date, text: text };
+  }
+
+  /* « 3 j 04 h 12 min 07 s » — recalculé chaque seconde. */
+  function remainingText(target) {
+    var left = Math.max(0, target - Date.now());
+    var sec = Math.floor(left / 1000);
+    var days = Math.floor(sec / 86400);
+    var hours = Math.floor((sec % 86400) / 3600);
+    var minutes = Math.floor((sec % 3600) / 60);
+    var seconds = sec % 60;
+    function pad(n) { return (n < 10 ? "0" : "") + n; }
+    return (days ? days + " j " : "") + pad(hours) + " h " + pad(minutes) + " min " + pad(seconds) + " s";
+  }
+
+  /* Un seul minuteur met à jour tous les comptes à rebours de la page. */
+  var countdownTimer = null;
+  function tickCountdowns() {
+    var nodes = $$("[data-countdown]");
+    if (!nodes.length) {
+      if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+      return;
+    }
+    nodes.forEach(function (node) {
+      var target = Number(node.getAttribute("data-countdown"));
+      if (!target) return;
+      if (target <= Date.now()) {
+        node.textContent = "Disponible maintenant";
+        node.removeAttribute("data-countdown");
+        var card = node.closest(".track-card");
+        if (card) card.classList.remove("is-soon");
+        return;
+      }
+      node.textContent = remainingText(target);
+    });
+  }
+
+  function startCountdowns() {
+    tickCountdowns();
+    if (!countdownTimer && $$("[data-countdown]").length) countdownTimer = setInterval(tickCountdowns, 1000);
+  }
+
   function trackCard(track) {
     var title = track.title || "Sans titre";
     var cover = isFilled(track.cover) ? track.cover : "assets/img/covers/placeholder.jpg";
     var type = TYPES[typeKey(track)] || track.type || "";
     var year = trackYear(track);
     var artist = isFilled(track.artist) ? track.artist : "DPT";
+    var release = releaseInfo(track);
+    var soon = release.status === "soon";
 
     var img = el("img", {
       src: cover,
@@ -244,37 +374,59 @@
       if (img.src.indexOf("placeholder.jpg") === -1) img.src = "assets/img/covers/placeholder.jpg";
     }, { once: true });
 
-    var coverBox = el("div", { "class": "track-cover" }, [img, type ? el("span", { "class": "track-type", text: type }) : null]);
+    var coverBox = el("div", { "class": "track-cover" }, [
+      // Disque vinyle qui dépasse de la pochette et tourne.
+      el("span", { "class": "vinyl vinyl-sm", "aria-hidden": "true" }),
+      img,
+      type ? el("span", { "class": "track-type", text: type }) : null,
+      el("span", { "class": "track-status" + (soon ? " is-soon" : ""), text: STATUS_LABELS[release.status] })
+    ]);
 
-    var meta = [artist, year].filter(Boolean).join(" · ");
+    var meta = [artist, soon ? "Sortie le " + release.text : year].filter(Boolean).join(" · ");
     var head = el("div", {}, [
       el("h3", { "class": "track-title", text: title }),
       el("p", { "class": "track-meta", text: meta })
     ]);
 
+    // Compte à rebours jusqu'à la sortie (uniquement pour les morceaux à venir).
+    var countdown = null;
+    if (soon) {
+      countdown = el("p", { "class": "countdown" }, [
+        el("span", { "class": "countdown-label", text: "Disponible dans" }),
+        el("time", {
+          "class": "countdown-value",
+          "data-countdown": String(release.date.getTime()),
+          datetime: track.releaseDate,
+          text: remainingText(release.date.getTime())
+        })
+      ]);
+    }
+
     var actions = el("div", { "class": "track-actions" });
     if (isFilled(track.mainLink)) {
       actions.appendChild(el("a", {
-        "class": "btn btn-primary",
+        "class": soon ? "btn btn-ghost" : "btn btn-primary",
         href: track.mainLink,
-        "aria-label": "Écouter « " + title + " »"
-      }, [icon("play"), el("span", { text: "Écouter" })]));
+        "aria-label": (soon ? "Voir la page de « " : "Écouter « ") + title + " »"
+      }, [soon ? null : icon("play"), el("span", { text: soon ? "Voir la page" : "Écouter" })]));
     }
 
+    // Plateformes : le nom est affiché à côté de l'icône.
     var platforms = el("ul", { "class": "platforms", "aria-label": "Plateformes d'écoute" });
     Object.keys(TRACK_PLATFORMS).forEach(function (key) {
       var url = track.platforms && track.platforms[key];
       if (!isFilled(url)) return; // lien vide = bouton masqué
       var label = TRACK_PLATFORMS[key];
       platforms.appendChild(el("li", {}, [
-        el("a", { href: url, "aria-label": "Écouter « " + title + " » sur " + label, title: label }, [icon(key)])
+        el("a", { href: url, "aria-label": "Écouter « " + title + " » sur " + label, title: label },
+          [icon(key), el("span", { "class": "platform-name", text: label })])
       ]));
     });
     actions.appendChild(platforms);
 
-    var card = el("article", { "class": "track-card", "data-type": typeKey(track), "data-id": track.id }, [
+    var card = el("article", { "class": "track-card" + (soon ? " is-soon" : ""), "data-type": typeKey(track), "data-id": track.id }, [
       coverBox,
-      el("div", { "class": "track-body" }, [head, actions])
+      el("div", { "class": "track-body" }, [head, countdown, actions])
     ]);
     externalize(card);
     return card;
@@ -287,14 +439,35 @@
       return;
     }
     tracks.forEach(function (t) { container.appendChild(trackCard(t)); });
+    startCountdowns();
   }
 
-  /* Accueil : les N premiers morceaux du fichier (les plus récents en haut). */
+  function isSoon(track) { return releaseInfo(track).status === "soon"; }
+
+  /* Les sorties à venir, de la plus proche à la plus lointaine. */
+  function upcomingTracks(tracks) {
+    return tracks.filter(isSoon).sort(function (a, b) {
+      return releaseInfo(a).date - releaseInfo(b).date;
+    });
+  }
+
+  /* Accueil : les N premiers morceaux déjà en écoute (les plus récents en haut). */
   function initLatest(tracks) {
     var box = $("[data-latest]");
     if (!box) return;
     var count = parseInt(box.getAttribute("data-latest"), 10) || 3;
-    renderTracks(box, tracks.slice(0, count), "Les sorties arrivent bientôt.");
+    var out = tracks.filter(function (t) { return !isSoon(t); });
+    renderTracks(box, out.slice(0, count), "Les sorties arrivent bientôt.");
+  }
+
+  /* Accueil : section « Prochaines sorties », masquée s'il n'y a rien à venir. */
+  function initUpcoming(tracks) {
+    var box = $("[data-upcoming]");
+    if (!box) return;
+    var soon = upcomingTracks(tracks);
+    var section = box.closest("[data-block]") || box;
+    section.hidden = !soon.length;
+    if (soon.length) renderTracks(box, soon, "");
   }
 
   /* Page Musique : discographie complète + filtres + recherche. */
@@ -307,10 +480,17 @@
     var search = $("#track-search");
     var counter = $("[data-count]");
 
+    function matchesFilter(track, f) {
+      if (f === "all") return true;
+      if (f === "soon") return isSoon(track);
+      if (f === "out") return !isSoon(track);
+      return typeKey(track) === f;
+    }
+
     // Masque les filtres qui ne correspondent à aucun morceau.
     filterButtons.forEach(function (b) {
       var f = b.getAttribute("data-filter");
-      if (f !== "all" && !tracks.some(function (t) { return typeKey(t) === f; })) b.hidden = true;
+      if (f !== "all" && !tracks.some(function (t) { return matchesFilter(t, f); })) b.hidden = true;
     });
 
     function normalize(s) {
@@ -320,10 +500,11 @@
     function update() {
       var q = normalize(state.query);
       var list = tracks.filter(function (t) {
-        var okType = state.type === "all" || typeKey(t) === state.type;
         var okQuery = !q || normalize(t.title).indexOf(q) !== -1;
-        return okType && okQuery;
+        return matchesFilter(t, state.type) && okQuery;
       });
+      // Les sorties à venir sont mises en avant, en haut de la liste.
+      list = upcomingTracks(list).concat(list.filter(function (t) { return !isSoon(t); }));
       renderTracks(box, list, "Aucun morceau ne correspond à votre recherche.");
       if (counter) counter.textContent = list.length + (list.length > 1 ? " morceaux" : " morceau");
     }
@@ -368,6 +549,7 @@
       getJSON(TRACKS_URL)
         .then(function (tracks) {
           if (!Array.isArray(tracks)) throw new Error("tracks.json doit contenir une liste [ ... ]");
+          initUpcoming(tracks);
           initLatest(tracks);
           initDiscography(tracks);
         })

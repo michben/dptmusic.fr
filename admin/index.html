@@ -65,6 +65,8 @@
           <h1>Espace admin</h1>
           <nav class="admin-tabs" role="tablist" aria-label="Sections">
             <button class="filter-btn" type="button" role="tab" id="tab-tracks" aria-controls="tracks-view" aria-selected="true">Sorties</button>
+            <button class="filter-btn" type="button" role="tab" id="tab-texts" aria-controls="texts-view" aria-selected="false">Textes du site</button>
+            <button class="filter-btn" type="button" role="tab" id="tab-images" aria-controls="images-view" aria-selected="false">Images</button>
             <button class="filter-btn" type="button" role="tab" id="tab-settings" aria-controls="settings-view" aria-selected="false">Liens et contact</button>
             <button class="filter-btn" type="button" role="tab" id="tab-duels" aria-controls="duels-view" aria-selected="false">Votes</button>
           </nav>
@@ -92,14 +94,124 @@
           <ol class="admin-list" id="track-list"></ol>
         </div>
 
-        <!-- Paramètres -->
-        <div id="settings-view" role="tabpanel" aria-labelledby="tab-settings" hidden>
-          <form id="settings-form" class="form admin-panel">
-            <p class="hint">Laissez un champ vide pour masquer l’élément sur le site.</p>
+        <!-- Textes du site -->
+        <div id="texts-view" role="tabpanel" aria-labelledby="tab-texts" hidden>
+          <form id="texts-form" class="form admin-panel">
+            <p class="hint">Un champ laissé vide masque le bloc correspondant sur le site. Pour faire plusieurs paragraphes, laissez une ligne vide entre eux.</p>
             <div>
               <label for="s-tagline">Slogan (sous « DPT » sur l’accueil)</label>
               <input id="s-tagline" name="tagline" type="text">
             </div>
+            <fieldset>
+              <legend>Page « À propos »</legend>
+              <div>
+                <label for="p-about-intro">Phrase d’accroche (en haut de la page)</label>
+                <textarea id="p-about-intro" rows="2"></textarea>
+              </div>
+              <div>
+                <label for="p-about-bio">Biographie</label>
+                <textarea id="p-about-bio" rows="6"></textarea>
+              </div>
+              <div>
+                <label for="p-about-universe">Univers musical</label>
+                <textarea id="p-about-universe" rows="4"></textarea>
+              </div>
+              <div>
+                <label for="p-about-influences">Influences</label>
+                <textarea id="p-about-influences" rows="3"></textarea>
+              </div>
+              <div>
+                <label for="p-about-quote">Citation ou phrase signature</label>
+                <textarea id="p-about-quote" rows="2"></textarea>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Mentions légales</legend>
+              <p class="hint">L’hébergeur et la propriété intellectuelle sont déjà écrits sur la page.</p>
+              <div>
+                <label for="p-legal-publisher">Éditeur du site (nom, adresse, e-mail)</label>
+                <textarea id="p-legal-publisher" rows="3"></textarea>
+              </div>
+              <div>
+                <label for="p-legal-manager">Responsable de la publication</label>
+                <textarea id="p-legal-manager" rows="2"></textarea>
+              </div>
+              <div>
+                <label for="p-legal-privacy">Données personnelles</label>
+                <textarea id="p-legal-privacy" rows="4"></textarea>
+              </div>
+            </fieldset>
+            <button class="btn btn-primary" type="submit">Enregistrer</button>
+            <p class="form-status" id="texts-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <!-- Images -->
+        <div id="images-view" role="tabpanel" aria-labelledby="tab-images" hidden>
+          <div class="admin-panel">
+            <h2>Photo officielle</h2>
+            <p class="hint">Elle s’affiche sur l’accueil, sur la page « À propos » (sauf si vous y mettez une autre photo plus bas) et quand on partage le site. Elle est recadrée en carré et compressée automatiquement.</p>
+            <div class="cover-field">
+              <img id="artist-preview" src="../assets/img/artist.jpg" alt="Photo officielle actuelle" width="160" height="160">
+              <div>
+                <label for="i-artist">Choisir une nouvelle photo (JPG ou PNG)</label>
+                <input id="i-artist" type="file" accept="image/jpeg,image/png,image/webp">
+                <button class="btn btn-primary" type="button" id="save-artist" disabled>Enregistrer la photo</button>
+                <p class="form-status" id="artist-status" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-panel admin-images-logo">
+            <h2>Logo</h2>
+            <p class="hint">Il s’affiche en haut de toutes les pages. Un PNG à fond transparent donne le meilleur résultat ; la forme d’origine est conservée.</p>
+            <div class="cover-field">
+              <img id="logo-preview" class="logo-preview" src="../assets/img/logo.png" alt="Logo actuel" width="160" height="64">
+              <div>
+                <label for="i-logo">Choisir un nouveau logo (PNG ou JPG)</label>
+                <input id="i-logo" type="file" accept="image/png,image/jpeg,image/webp">
+                <button class="btn btn-primary" type="button" id="save-logo" disabled>Enregistrer le logo</button>
+                <p class="form-status" id="logo-status" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-panel admin-images-more">
+            <h2>Photo de la page « À propos »</h2>
+            <p class="hint">Facultatif : une autre photo que celle de l’accueil. Tant qu’aucune n’est choisie, la page « À propos » affiche la photo officielle.</p>
+            <div class="cover-field">
+              <img id="about-preview" src="../assets/img/artist.jpg" alt="Photo actuelle de la page À propos" width="160" height="160">
+              <div>
+                <label for="i-about">Choisir une photo (JPG ou PNG)</label>
+                <input id="i-about" type="file" accept="image/jpeg,image/png,image/webp">
+                <button class="btn btn-primary" type="button" id="save-about" disabled>Enregistrer la photo</button>
+                <button class="btn btn-ghost btn-sm" type="button" id="about-reset" hidden>Revenir à la photo officielle</button>
+                <p class="form-status" id="about-status" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-panel admin-images-more">
+            <h2>Icône du site</h2>
+            <p class="hint">La petite image dans l’onglet du navigateur et sur l’écran d’accueil des téléphones. Choisissez une image carrée et simple (par exemple votre logo seul) : elle est déclinée automatiquement dans toutes les tailles.</p>
+            <div class="cover-field">
+              <img id="icon-preview" class="icon-preview" src="../assets/img/apple-touch-icon.png" alt="Icône actuelle du site" width="96" height="96">
+              <div>
+                <label for="i-icon">Choisir une icône (PNG ou JPG, carrée)</label>
+                <input id="i-icon" type="file" accept="image/png,image/jpeg,image/webp">
+                <button class="btn btn-primary" type="button" id="save-icon" disabled>Enregistrer l’icône</button>
+                <p class="form-status" id="icon-status" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </div>
+
+          <p class="hint admin-images-note">Les pochettes se changent sur chaque sortie (onglet « Sorties » → « Modifier »). L’image affichée quand on partage le site sur les réseaux est la photo officielle.</p>
+        </div>
+
+        <!-- Paramètres -->
+        <div id="settings-view" role="tabpanel" aria-labelledby="tab-settings" hidden>
+          <form id="settings-form" class="form admin-panel">
+            <p class="hint">Laissez un champ vide pour masquer l’élément sur le site.</p>
             <div>
               <label for="s-listenLink">Lien des boutons « Écouter »</label>
               <input id="s-listenLink" name="listenLink" type="url" placeholder="https://…">
@@ -168,6 +280,7 @@
         <div>
           <label for="t-releaseDate">Date de sortie</label>
           <input id="t-releaseDate" name="releaseDate" type="text" inputmode="numeric" placeholder="AAAA-MM-JJ ou AAAA" pattern="\d{4}(-\d{2}-\d{2})?">
+          <p class="hint" id="release-hint">Date complète (AAAA-MM-JJ) encore à venir : la sortie passe en « À venir » avec un compte à rebours. Sinon elle est marquée « En écoute ».</p>
         </div>
       </div>
       <div>

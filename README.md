@@ -7,7 +7,7 @@ Toutes les modifications courantes (ajouter un morceau, changer un lien, mettre 
 | Fichier | Rôle |
 | --- | --- |
 | `assets/data/tracks.json` | La liste des morceaux (page Musique et « Dernières sorties ») |
-| `assets/data/site.json` | Slogan, lien « Écouter », e-mail, formulaire, réseaux sociaux |
+| `assets/data/site.json` | Slogan, textes « À propos » et mentions légales, photo officielle et logo, lien « Écouter », e-mail, formulaire, réseaux sociaux |
 
 > Astuce : sur GitHub, ouvrez le fichier, cliquez sur l’icône crayon (✏️ *Edit this file*), faites la modification puis cliquez sur **Commit changes**. Le site se met à jour tout seul en 1 à 2 minutes.
 
@@ -20,17 +20,17 @@ dptmusic.fr/
 ├── index.html              Accueil
 ├── music.html              Discographie (générée depuis tracks.json)
 ├── vote.html               Votes « Quelle version tu préfères ? » (depuis duels.json)
-├── about.html              À propos (textes à compléter)
+├── about.html              À propos (textes saisis dans l’admin)
 ├── contact.html            Contact
-├── mentions-legales.html   Mentions légales (à compléter)
+├── mentions-legales.html   Mentions légales (textes saisis dans l’admin)
 ├── 404.html                Page « introuvable »
 ├── admin/                  Espace admin (gestion des sorties et des liens)
 ├── assets/
 │   ├── css/style.css       Styles (couleurs en haut du fichier)
 │   ├── js/main.js          Script (pas besoin d’y toucher)
 │   ├── img/
-│   │   ├── logo.png        Logo (provisoire)
-│   │   ├── artist.jpg      Photo de l’artiste (provisoire, sert aussi d’image de partage)
+│   │   ├── logo.png        Logo (remplaçable depuis /admin/, onglet « Images »)
+│   │   ├── artist.jpg      Photo officielle (remplaçable depuis /admin/ ; sert aussi d’image de partage)
 │   │   ├── favicon.svg, favicon-32.png, apple-touch-icon.png
 │   │   └── covers/         Pochettes des morceaux
 │   └── data/
@@ -54,7 +54,11 @@ Une interface d’administration est disponible à l’adresse **https://dptmusi
 - **ajouter une nouvelle sortie** (titre, type, date, lien d’écoute, liens Spotify / Apple Music / YouTube / Deezer, pochette) ;
 - **modifier** ou **supprimer** une sortie ;
 - **changer l’ordre** des sorties (flèches ↑ ↓) ;
-- modifier le **slogan**, le lien **Écouter**, l’**e-mail**, **Formspree** et les **réseaux sociaux** (onglet « Liens et contact »).
+- écrire les **textes du site** : slogan, page « À propos » (accroche, biographie, univers musical, influences, citation) et **mentions légales** (éditeur, responsable de publication, données personnelles) — onglet « Textes du site » ;
+- changer la **photo officielle**, le **logo**, une **photo dédiée à la page « À propos »** (facultative) et l’**icône du site** (onglet du navigateur, écran d’accueil des téléphones) — onglet « Images » ;
+- modifier le lien **Écouter**, l’**e-mail**, **Formspree** et les **réseaux sociaux** (onglet « Liens et contact »).
+
+Dans les textes, une **ligne vide sépare deux paragraphes**, et un champ laissé vide masque le bloc correspondant sur le site.
 
 La pochette envoyée est automatiquement recadrée en carré, redimensionnée en 800 × 800 px et compressée. Chaque enregistrement crée une modification (commit) dans le dépôt GitHub, et le site se met à jour tout seul en 1 à 2 minutes.
 
@@ -163,6 +167,7 @@ Règles à respecter :
 - Les textes sont **entre guillemets droits** `"..."`.
 - `id` : un identifiant unique, en minuscules et sans espace (ex. `mon-titre`).
 - `releaseDate` : `AAAA-MM-JJ` ou seulement `AAAA`. Laissez `""` si inconnue : l’année ne s’affiche pas.
+  **Une date complète encore à venir** (ex. `2026-12-01`) fait passer la sortie en « À venir » : elle s’affiche dans la section « Prochaines sorties » de l’accueil, en haut de la page Musique, avec un **compte à rebours** qui se met à jour chaque seconde. Dès que la date est passée, la sortie bascule automatiquement en « En écoute ». Rien n’est deviné : sans date complète, la sortie est considérée comme déjà disponible.
 - `type` : `Single`, `EP`, `Album` ou `Featuring` (c’est ce qui alimente les filtres de la page Musique).
 - `cover` : chemin de la pochette. Laissez `""` pour afficher une pochette neutre.
 - `mainLink` : le lien du bouton **Écouter** (ex. lien Ditto).
@@ -208,19 +213,20 @@ Le formulaire apparaît alors sur la page Contact et les messages arrivent dans 
 
 ## Contenus à compléter
 
-Les zones à remplir sont signalées dans le code par des commentaires `À COMPLÉTER` et, sur le site, par des encadrés en pointillés.
+Le plus simple est de tout saisir depuis l’espace admin (`/admin/`). Les textes et les images sont enregistrés dans `assets/data/site.json` : un champ vide masque simplement le bloc sur le site.
 
 | Contenu | Où |
 | --- | --- |
-| Biographie courte, biographie longue, univers musical, influences, citation | `about.html` |
-| Photo officielle | remplacer `assets/img/artist.jpg` (carré 1200 × 1200 px, < 300 Ko) |
-| Logo | remplacer `assets/img/logo.png` (PNG transparent, ~600 px de large) |
-| Favicon | remplacer `assets/img/favicon.svg`, `favicon-32.png` et `apple-touch-icon.png` (180 × 180) |
+| Biographie courte, biographie longue, univers musical, influences, citation | `/admin/` onglet « Textes du site » (ou `assets/data/site.json`, clé `about`) |
+| Photo officielle | `/admin/` onglet « Images » (ou remplacer `assets/img/artist.jpg`, carré 1200 × 1200 px) |
+| Logo | `/admin/` onglet « Images » (ou remplacer `assets/img/logo.png`, PNG transparent) |
+| Photo de la page « À propos » | `/admin/` onglet « Images » (facultatif : sinon la photo officielle s’affiche) |
+| Favicon (icône du site) | `/admin/` onglet « Images » : une image carrée suffit, les tailles 32 px, 180 px et SVG sont créées automatiquement |
 | Pochettes | `assets/img/covers/` (la pochette actuelle de « DPT » est provisoire) |
 | Morceaux | `assets/data/tracks.json` |
 | Liens Spotify, Apple Music, YouTube, Deezer, Instagram, TikTok… | `assets/data/site.json` et `tracks.json` |
 | E-mail de contact | `assets/data/site.json` |
-| Mentions légales | `mentions-legales.html` |
+| Mentions légales | `/admin/` onglet « Textes du site » (ou `assets/data/site.json`, clé `legal`) |
 
 Gardez les **mêmes noms de fichiers** pour les images : il suffit alors de remplacer le fichier, sans rien modifier ailleurs.
 

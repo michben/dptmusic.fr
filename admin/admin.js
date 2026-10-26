@@ -21,7 +21,17 @@
     importResultPath: "import/resultat.json",
     importTimeout: 180000, // on attend la fin de l'import 3 minutes au plus
     coverSize: 800,      // pochettes enregistrées en 800 × 800 px
-    coverQuality: 0.82   // qualité JPEG
+    coverQuality: 0.82,  // qualité JPEG
+    artistPath: "assets/img/artist.jpg",  // photo officielle (accueil + à propos)
+    artistSize: 1200,    // photo enregistrée en 1200 × 1200 px
+    logoPath: "assets/img/logo.png",      // logo de l'en-tête
+    logoWidth: 900,      // largeur maximale du logo, hauteur proportionnelle
+    aboutPath: "assets/img/about.jpg",    // photo de la page « À propos » (facultative)
+    iconPaths: {                          // icône du site (onglet du navigateur, écran d'accueil)
+      svg: "assets/img/favicon.svg",
+      png32: "assets/img/favicon-32.png",
+      apple: "assets/img/apple-touch-icon.png"
+    }
   };
 
   var TOKEN_KEY = "dpt-admin-token";
@@ -37,6 +47,19 @@
     facebook: "Facebook"
   };
 
+  /* Textes de la page « À propos » et des mentions légales : identifiant du
+     champ dans l'admin -> emplacement dans site.json. */
+  var TEXTS = {
+    "p-about-intro": ["about", "intro"],
+    "p-about-bio": ["about", "bio"],
+    "p-about-universe": ["about", "universe"],
+    "p-about-influences": ["about", "influences"],
+    "p-about-quote": ["about", "quote"],
+    "p-legal-publisher": ["legal", "publisher"],
+    "p-legal-manager": ["legal", "manager"],
+    "p-legal-privacy": ["legal", "privacy"]
+  };
+
   var state = {
     token: "",
     tracks: [],
@@ -45,6 +68,11 @@
     siteSha: null,
     editingIndex: -1,  // -1 = nouvelle sortie
     coverData: null,   // pochette choisie (data URL JPEG)
+    artistData: null,  // photo officielle choisie (data URL JPEG)
+    logoData: null,    // logo choisi (data URL PNG)
+    aboutData: null,   // photo « À propos » choisie (data URL JPEG)
+    iconFile: null,    // icône du site choisie (fichier d'origine, déclinée en plusieurs tailles)
+    iconData: null,    // aperçu de l'icône choisie
     previews: {}       // id -> data URL, pour afficher une pochette avant la mise en ligne
   };
 
@@ -194,6 +222,14 @@
   /* Liste des sorties                                                       */
   /* ---------------------------------------------------------------------- */
 
+  /* Même règle que le site : une date complète encore à venir = sortie à venir. */
+  function isUpcoming(track) {
+    var parts = String(track.releaseDate || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!parts) return false;
+    var date = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 0, 0, 0);
+    return !isNaN(date.getTime()) && date.getTime() > Date.now();
+  }
+
   function coverSrc(track) {
     if (state.previews[track.id]) return state.previews[track.id];
     return track.cover ? "../" + track.cover : "../assets/img/covers/placeholder.jpg";
@@ -237,7 +273,8 @@
       var title = document.createElement("strong");
       title.textContent = track.title || "Sans titre";
       var meta = document.createElement("span");
-      meta.textContent = [track.type, track.releaseDate].filter(Boolean).join(" · ");
+      meta.textContent = [track.type, track.releaseDate, isUpcoming(track) ? "À venir" : "En écoute"]
+        .filter(Boolean).join(" · ");
       info.appendChild(title);
       info.appendChild(meta);
 
@@ -354,26 +391,48 @@
     $("t-title").focus();
   }
 
-  /* Recadre l'image en carré, la redimensionne et la compresse en JPEG. */
-  function processCover(file) {
+  /* Prépare une image dans le navigateur avant de l'envoyer.
+     - mode "square" : recadrée au centre en carré, enregistrée en JPEG (pochettes, photo) ;
+     - mode "fit"    : forme d'origine conservée, enregistrée en PNG (logo transparent). */
+  function processImage(file, options) {
     return new Promise(function (resolve, reject) {
       var url = URL.createObjectURL(file);
       var img = new Image();
       img.onload = function () {
-        var side = Math.min(img.naturalWidth, img.naturalHeight);
-        var size = Math.min(CONFIG.coverSize, side);
         var canvas = document.createElement("canvas");
+        var ctx;
+        if (options.mode === "fit") {
+          var scale = Math.min(1, options.maxWidth / img.naturalWidth);
+          canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL("image/png"));
+          return;
+        }
+        var side = Math.min(img.naturalWidth, img.naturalHeight);
+        // L'icône du site doit faire exactement sa taille, même à partir d'une petite image.
+        var size = options.exact ? options.size : Math.min(options.size, side);
+        var png = options.format === "png";
         canvas.width = canvas.height = size;
-        var ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#0b0b0d";
-        ctx.fillRect(0, 0, size, size);
+        ctx = canvas.getContext("2d");
+        if (!png) { // le JPEG n'a pas de transparence : fond sombre du site
+          ctx.fillStyle = "#0b0b0d";
+          ctx.fillRect(0, 0, size, size);
+        }
+        ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", CONFIG.coverQuality));
+        resolve(png ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", options.quality || CONFIG.coverQuality));
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Image illisible.")); };
       img.src = url;
     });
+  }
+
+  function processCover(file) {
+    return processImage(file, { mode: "square", size: CONFIG.coverSize });
   }
 
   function uploadCover(id, dataUrl) {
@@ -533,36 +592,169 @@
     var s = state.site;
     ["tagline", "listenLink", "email", "formspreeId"].forEach(function (k) { $("s-" + k).value = s[k] || ""; });
     Object.keys(SOCIALS).forEach(function (k) { $("s-social-" + k).value = (s.socials && s.socials[k]) || ""; });
+    Object.keys(TEXTS).forEach(function (id) {
+      var place = TEXTS[id];
+      $(id).value = (s[place[0]] && s[place[0]][place[1]]) || "";
+    });
+    fillImages();
+  }
+
+  /* Copie modifiable de site.json : les champs qu'on ne touche pas sont conservés. */
+  function siteCopy() { return JSON.parse(JSON.stringify(state.site)); }
+
+  function saveSite(site, message, status, done) {
+    setBusy(true);
+    if (status) status.textContent = "Publication…";
+    return writeJSON(CONFIG.sitePath, site, state.siteSha, message)
+      .then(function (sha) {
+        state.site = site;
+        state.siteSha = sha;
+        if (status) status.textContent = "";
+        flash(done);
+      })
+      .catch(function (err) {
+        var text = explain(err);
+        if (status) status.textContent = text; else flash(text, true);
+      })
+      .then(function () { setBusy(false); });
   }
 
   function submitSettings(e) {
     e.preventDefault();
     if (!$("settings-form").reportValidity()) return;
-    var site = JSON.parse(JSON.stringify(state.site)); // conserve les autres champs (ex. _aide)
-    ["tagline", "listenLink", "email", "formspreeId"].forEach(function (k) { site[k] = $("s-" + k).value.trim(); });
+    var site = siteCopy();
+    ["listenLink", "email", "formspreeId"].forEach(function (k) { site[k] = $("s-" + k).value.trim(); });
     site.socials = site.socials || {};
     Object.keys(SOCIALS).forEach(function (k) { site.socials[k] = $("s-social-" + k).value.trim(); });
+    saveSite(site, "Admin : mise à jour des liens et du contact", null,
+      "Liens et contact enregistrés. Le site sera à jour d’ici 1 à 2 minutes.");
+  }
 
+  /* ---------------------------------------------------------------------- */
+  /* Textes du site (slogan, à propos, mentions légales)                     */
+  /* ---------------------------------------------------------------------- */
+
+  function submitTexts(e) {
+    e.preventDefault();
+    var site = siteCopy();
+    site.tagline = $("s-tagline").value.trim();
+    Object.keys(TEXTS).forEach(function (id) {
+      var place = TEXTS[id];
+      site[place[0]] = site[place[0]] || {};
+      site[place[0]][place[1]] = $(id).value.trim();
+    });
+    saveSite(site, "Admin : mise à jour des textes du site", $("texts-status"),
+      "Textes enregistrés. Le site sera à jour d’ici 1 à 2 minutes.");
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Images (photo officielle, logo, photo « À propos », icône du site)     */
+  /* ---------------------------------------------------------------------- */
+
+  /* Le ?v= change à chaque enregistrement : les visiteurs voient la nouvelle
+     image tout de suite, sans vider le cache de leur navigateur. */
+  function imagePath(path) { return path + "?v=" + Date.now().toString(36); }
+
+  function currentImage(key, fallback) {
+    var value = state.site.images && state.site.images[key];
+    return "../" + (value || fallback);
+  }
+
+  function fillImages() {
+    $("artist-preview").src = state.artistData || currentImage("artist", CONFIG.artistPath);
+    $("logo-preview").src = state.logoData || currentImage("logo", CONFIG.logoPath);
+    // Sans photo « À propos », la page utilise la photo officielle.
+    var hasAbout = !!(state.site.images && state.site.images.about);
+    $("about-preview").src = state.aboutData || (hasAbout ? currentImage("about", CONFIG.aboutPath) : currentImage("artist", CONFIG.artistPath));
+    $("about-reset").hidden = !hasAbout;
+    $("icon-preview").src = state.iconData || currentImage("icon", CONFIG.iconPaths.apple);
+  }
+
+  /* Envoie un ou plusieurs fichiers image dans le dépôt, l'un après l'autre. */
+  function putImages(files) {
+    return files.reduce(function (step, f) {
+      return step.then(function () {
+        return getFile(f.path, true).then(function (existing) {
+          return putFile(f.path, f.base64, existing && existing.sha, "Admin : mise à jour de " + f.path);
+        });
+      });
+    }, Promise.resolve());
+  }
+
+  /* Enregistre la nouvelle valeur de images[key] dans site.json (valeur vide = image retirée). */
+  function setImageValue(key, value) {
+    var site = siteCopy();
+    site.images = site.images || {};
+    site.images[key] = value;
+    return writeJSON(CONFIG.sitePath, site, state.siteSha, "Admin : nouvelle image du site").then(function (sha) {
+      state.site = site;
+      state.siteSha = sha;
+    });
+  }
+
+  /* Remplace le(s) fichier(s) image dans le dépôt, puis note le nouveau ?v= dans site.json.
+     `files` : liste de { path, base64 } ; `mainPath` : le fichier noté dans site.json. */
+  function saveImage(key, mainPath, files, status, done) {
     setBusy(true);
-    writeJSON(CONFIG.sitePath, site, state.siteSha, "Admin : mise à jour des liens et du contact")
-      .then(function (sha) {
-        state.site = site;
-        state.siteSha = sha;
-        flash("Liens et contact enregistrés. Le site sera à jour d’ici 1 à 2 minutes.");
-      })
-      .catch(function (err) { flash(explain(err), true); })
-      .then(function () { setBusy(false); });
+    status.textContent = "Envoi de l’image…";
+    putImages(files).then(function () {
+      return setImageValue(key, imagePath(mainPath));
+    }).then(function () {
+      status.textContent = "";
+      fillImages();
+      flash(done);
+    }).catch(function (err) {
+      status.textContent = explain(err);
+    }).then(function () { setBusy(false); });
+  }
+
+  function single(path, dataUrl) { return [{ path: path, base64: dataUrl.split(",")[1] }]; }
+
+  /* Icône du site : une image carrée déclinée en 32 px (onglet), 180 px (iPhone)
+     et en SVG (navigateurs récents), qui contient l'image en 180 px. */
+  function buildIconFiles(file) {
+    return Promise.all([
+      processImage(file, { mode: "square", size: 32, exact: true, format: "png" }),
+      processImage(file, { mode: "square", size: 180, exact: true, format: "png" })
+    ]).then(function (pngs) {
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 180 180">'
+        + '<image width="180" height="180" href="' + pngs[1] + '" xlink:href="' + pngs[1] + '"/></svg>\n';
+      return [
+        { path: CONFIG.iconPaths.png32, base64: pngs[0].split(",")[1] },
+        { path: CONFIG.iconPaths.apple, base64: pngs[1].split(",")[1] },
+        { path: CONFIG.iconPaths.svg, base64: utf8ToBase64(svg) }
+      ];
+    });
+  }
+
+  /* Prépare une image choisie : aperçu immédiat, bouton d'enregistrement actif. */
+  function watchImageField(inputId, buttonId, previewId, statusId, options, store) {
+    $(inputId).addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      $(statusId).textContent = "Préparation de l’image…";
+      processImage(file, options).then(function (data) {
+        store(data);
+        $(previewId).src = data;
+        $(buttonId).disabled = false;
+        $(statusId).textContent = "Cliquez sur « Enregistrer » pour publier cette image.";
+      }).catch(function (err) {
+        $(statusId).textContent = err.message;
+      });
+    });
   }
 
   /* ---------------------------------------------------------------------- */
   /* Démarrage                                                               */
   /* ---------------------------------------------------------------------- */
 
+  var TABS = ["tracks", "texts", "images", "settings", "duels"];
+
   function selectTab(name) {
-    ["tracks", "settings", "duels"].forEach(function (t) {
-      if (!$("tab-" + t) || !$(t + "-view")) return;
-      $("tab-" + t).setAttribute("aria-selected", String(t === name));
-      $(t + "-view").hidden = t !== name;
+    TABS.forEach(function (tab) {
+      if (!$("tab-" + tab) || !$(tab + "-view")) return;
+      $("tab-" + tab).setAttribute("aria-selected", String(tab === name));
+      $(tab + "-view").hidden = tab !== name;
     });
   }
 
@@ -622,8 +814,55 @@
       show("login");
     });
 
-    $("tab-tracks").addEventListener("click", function () { selectTab("tracks"); });
-    $("tab-settings").addEventListener("click", function () { selectTab("settings"); });
+    TABS.forEach(function (tab) {
+      $("tab-" + tab).addEventListener("click", function () { selectTab(tab); });
+    });
+
+    $("texts-form").addEventListener("submit", submitTexts);
+
+    watchImageField("i-artist", "save-artist", "artist-preview", "artist-status",
+      { mode: "square", size: CONFIG.artistSize }, function (data) { state.artistData = data; });
+    watchImageField("i-logo", "save-logo", "logo-preview", "logo-status",
+      { mode: "fit", maxWidth: CONFIG.logoWidth }, function (data) { state.logoData = data; });
+
+    watchImageField("i-about", "save-about", "about-preview", "about-status",
+      { mode: "square", size: CONFIG.artistSize }, function (data) { state.aboutData = data; });
+    watchImageField("i-icon", "save-icon", "icon-preview", "icon-status",
+      { mode: "square", size: 180, exact: true, format: "png" }, function (data) { state.iconData = data; state.iconFile = $("i-icon").files[0]; });
+
+    $("save-artist").addEventListener("click", function () {
+      if (!state.artistData) return;
+      saveImage("artist", CONFIG.artistPath, single(CONFIG.artistPath, state.artistData), $("artist-status"),
+        "Nouvelle photo officielle enregistrée. Le site sera à jour d’ici 1 à 2 minutes.");
+    });
+    $("save-logo").addEventListener("click", function () {
+      if (!state.logoData) return;
+      saveImage("logo", CONFIG.logoPath, single(CONFIG.logoPath, state.logoData), $("logo-status"),
+        "Nouveau logo enregistré. Le site sera à jour d’ici 1 à 2 minutes.");
+    });
+    $("save-about").addEventListener("click", function () {
+      if (!state.aboutData) return;
+      saveImage("about", CONFIG.aboutPath, single(CONFIG.aboutPath, state.aboutData), $("about-status"),
+        "Photo de la page « À propos » enregistrée. Le site sera à jour d’ici 1 à 2 minutes.");
+    });
+    $("about-reset").addEventListener("click", function () {
+      if (!window.confirm("La page « À propos » affichera de nouveau la photo officielle. Continuer ?")) return;
+      setBusy(true);
+      setImageValue("about", "").then(function () {
+        state.aboutData = null;
+        fillImages();
+        flash("La page « À propos » utilise de nouveau la photo officielle. Le site sera à jour d’ici 1 à 2 minutes.");
+      }).catch(function (err) { $("about-status").textContent = explain(err); })
+        .then(function () { setBusy(false); });
+    });
+    $("save-icon").addEventListener("click", function () {
+      if (!state.iconFile) return;
+      $("icon-status").textContent = "Préparation des différentes tailles…";
+      buildIconFiles(state.iconFile).then(function (files) {
+        saveImage("icon", CONFIG.iconPaths.apple, files, $("icon-status"),
+          "Nouvelle icône enregistrée. Le site sera à jour d’ici 1 à 2 minutes (les navigateurs peuvent garder l’ancienne icône un peu plus longtemps).");
+      }).catch(function (err) { $("icon-status").textContent = err.message; });
+    });
 
     $("new-track").addEventListener("click", function () { openForm(-1); });
     $("track-cancel").addEventListener("click", function () { closeDialog($("track-dialog")); });
