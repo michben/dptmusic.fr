@@ -1,10 +1,10 @@
 {
-  "requestId": "mvl10q1n-qjbq56",
-  "url": "https://ditto.fm/qui-suis-je-dpt",
+  "requestId": "mvpb8bt1-yw5tag",
+  "url": "https://ditto.fm/bloc20us26",
   "status": "ok",
-  "message": "« qui suis-je ? » a été ajoutée avec 10 plateformes.",
-  "trackId": "qui-suis-je",
-  "title": "qui suis-je ?",
+  "message": "« bloc20Us26 » a été ajoutée avec 10 plateformes.",
+  "trackId": "bloc20us26",
+  "title": "bloc20Us26",
   "platforms": [
     "spotify",
     "youtube",
@@ -17,5 +17,5 @@
     "kkbox",
     "iheart"
   ],
-  "finishedAt": "2026-10-23T13:49:37.425Z"
+  "finishedAt": "2026-10-26T13:46:34.194Z"
 }

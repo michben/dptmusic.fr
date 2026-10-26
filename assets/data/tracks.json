@@ -1,5 +1,27 @@
 [
   {
+    "id": "bloc20us26",
+    "title": "bloc20Us26",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/bloc20us26.jpg?v=mvpb8lsh",
+    "mainLink": "https://ditto.fm/bloc20us26",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/6VjEazL4eCWdwJ27UKwADh",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=xaZZar_ym8A",
+      "deezer": "https://www.deezer.com/track/4336852342",
+      "tidal": "https://www.tidal.com/track/568372857",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/bloc20us26",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HMFF3WRW/",
+      "anghami": "https://play.anghami.com/song/1306617454",
+      "youtubeMusic": "https://music.youtube.com/watch?v=xaZZar_ym8A",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/KkQAX6xz5hrtBny-QL",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/438777146/"
+    }
+  },
+  {
     "id": "qui-suis-je",
     "title": "qui suis-je ?",
     "artist": "DPT",
