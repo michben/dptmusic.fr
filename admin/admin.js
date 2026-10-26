@@ -225,9 +225,9 @@
   /* Même règle que le site : une date complète encore à venir = sortie à venir. */
   function isUpcoming(track) {
     var parts = String(track.releaseDate || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!parts) return false;
-    var date = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 0, 0, 0);
-    return !isNaN(date.getTime()) && date.getTime() > Date.now();
+    var date = parts ? new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 0, 0, 0) : null;
+    if (date && !isNaN(date.getTime())) return date.getTime() > Date.now();
+    return track.upcoming === true;
   }
 
   function coverSrc(track) {
@@ -382,6 +382,7 @@
     $("t-releaseDate").value = track ? track.releaseDate || "" : "";
     $("t-artist").value = track ? track.artist || "" : "DPT";
     $("t-mainLink").value = track ? track.mainLink || "" : "";
+    $("t-upcoming").checked = !!(track && track.upcoming === true);
     PLATFORMS.forEach(function (key) {
       $("t-" + key).value = track && track.platforms ? track.platforms[key] || "" : "";
     });
@@ -467,6 +468,7 @@
       platforms: Object.assign({}, old && old.platforms)
     };
     PLATFORMS.forEach(function (key) { track.platforms[key] = $("t-" + key).value.trim(); });
+    if ($("t-upcoming").checked) track.upcoming = true;
 
     var status = $("track-status");
     setBusy(true);
