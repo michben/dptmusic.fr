@@ -234,6 +234,10 @@ Gardez les **mêmes noms de fichiers** pour les images : il suffit alors de remp
 
 Avant d’ajouter une image, compressez-la avec https://squoosh.app (gratuit, dans le navigateur) : choisissez **MozJPEG**, qualité **75 à 80**, et redimensionnez à la taille conseillée. Une page légère se charge vite sur mobile.
 
+### Après une modification du code (CSS ou JavaScript)
+
+Les pages chargent `style.css`, `main.js`, `admin.js`… avec un numéro de version (`?v=5`). Si vous modifiez l’un de ces fichiers, augmentez ce numéro dans les pages HTML (`?v=6`) : sinon les navigateurs peuvent garder l’ancienne version en mémoire et les nouveaux boutons ne répondent pas.
+
 ### Changer les couleurs
 
 Les couleurs sont regroupées en haut de `assets/css/style.css` (bloc `:root`). Par exemple, `--accent: #ff4d2e;` est la couleur vive des boutons.
