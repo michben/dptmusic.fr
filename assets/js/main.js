@@ -410,7 +410,7 @@
     });
     actions.appendChild(platforms);
 
-    var card = el("article", { "class": "track-card" + (soon ? " is-soon" : ""), "data-type": typeKey(track) }, [
+    var card = el("article", { "class": "track-card" + (soon ? " is-soon" : ""), "data-type": typeKey(track), "data-id": track.id }, [
       coverBox,
       el("div", { "class": "track-body" }, [head, countdown, actions])
     ]);

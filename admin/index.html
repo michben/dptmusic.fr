@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <!-- Sécurité : cette page ne peut parler qu'à l'API GitHub, ce qui protège votre jeton. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com; img-src 'self' data: blob:; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; form-action 'none'; base-uri 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://api.github.com https://*.workers.dev; img-src 'self' data: blob:; media-src 'self' blob:; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; form-action 'none'; base-uri 'none'">
   <meta name="referrer" content="no-referrer">
   <title>Admin — DPT</title>
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../assets/css/style.css?v=4">
   <link rel="stylesheet" href="admin.css?v=4">
   <script src="admin.js?v=4" defer></script>
+  <script src="duels.js?v=1" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -67,6 +68,7 @@
             <button class="filter-btn" type="button" role="tab" id="tab-texts" aria-controls="texts-view" aria-selected="false">Textes du site</button>
             <button class="filter-btn" type="button" role="tab" id="tab-images" aria-controls="images-view" aria-selected="false">Images</button>
             <button class="filter-btn" type="button" role="tab" id="tab-settings" aria-controls="settings-view" aria-selected="false">Liens et contact</button>
+            <button class="filter-btn" type="button" role="tab" id="tab-duels" aria-controls="duels-view" aria-selected="false">Votes</button>
           </nav>
         </div>
 
@@ -200,6 +202,16 @@
             <button class="btn btn-primary" type="submit">Enregistrer</button>
           </form>
         </div>
+
+        <!-- Votes : duels « Quelle version tu préfères ? » (admin/duels.js) -->
+        <div id="duels-view" role="tabpanel" aria-labelledby="tab-duels" hidden>
+          <div class="section-head">
+            <p class="lead admin-intro">Proposez deux versions d’un morceau : le public inscrit vote sur la page « Vote » jusqu’à la date de fin, avec les résultats en direct.</p>
+            <button class="btn btn-primary" type="button" id="new-duel">+ Nouveau vote</button>
+          </div>
+          <p class="admin-panel admin-notice" id="votes-service" hidden></p>
+          <ol class="admin-list" id="duel-list"></ol>
+        </div>
       </section>
 
       <p id="loading" class="admin-panel admin-narrow">Chargement…</p>
@@ -267,6 +279,55 @@
         <button class="btn btn-primary" type="submit" id="track-save">Enregistrer et publier</button>
       </div>
       <p class="form-status" id="track-status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <!-- ===== Formulaire d'un vote (duel de versions) ===== -->
+  <dialog id="duel-dialog" class="admin-dialog" aria-labelledby="duel-dialog-title">
+    <form id="duel-form" class="form" method="dialog">
+      <h2 id="duel-dialog-title">Nouveau vote</h2>
+
+      <div>
+        <label for="d-title">Titre du vote *</label>
+        <input id="d-title" type="text" required placeholder="ex. Mon prochain single : quelle version ?">
+      </div>
+      <div>
+        <label for="d-description">Petit texte (facultatif)</label>
+        <input id="d-description" type="text" placeholder="ex. Deux mix, une seule sortira. À toi de choisir !">
+      </div>
+      <div class="cover-field">
+        <img id="d-cover-preview" src="../assets/img/covers/placeholder.jpg" alt="Aperçu de l’image du vote" width="160" height="160">
+        <div>
+          <label for="d-cover">Image (facultatif, JPG ou PNG)</label>
+          <input id="d-cover" type="file" accept="image/jpeg,image/png,image/webp">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="d-start">Début (facultatif)</label>
+          <input id="d-start" type="datetime-local">
+          <p class="hint">Vide = le vote commence tout de suite.</p>
+        </div>
+        <div>
+          <label for="d-end">Fin du vote *</label>
+          <input id="d-end" type="datetime-local" required>
+          <p class="hint">Heure de votre appareil. Un compte à rebours s’affiche sur le site.</p>
+        </div>
+      </div>
+
+      <fieldset id="d-versions"></fieldset>
+
+      <div id="d-winner-field" hidden>
+        <label for="d-winner">Version retenue (facultatif)</label>
+        <select id="d-winner"></select>
+        <p class="hint">Par défaut, le site annonce la version qui a le plus de votes.</p>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="duel-cancel">Annuler</button>
+        <button class="btn btn-primary" type="submit">Enregistrer et publier</button>
+      </div>
+      <p class="form-status" id="duel-status" role="status" aria-live="polite"></p>
     </form>
   </dialog>
 </body>

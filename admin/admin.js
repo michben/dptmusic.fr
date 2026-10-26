@@ -205,6 +205,7 @@
       renderTracks();
       fillSettings();
       show("app");
+      document.dispatchEvent(new CustomEvent("dpt-admin:ready")); // onglet « Votes » (duels.js)
     });
   }
 
@@ -693,14 +694,33 @@
   /* Démarrage                                                               */
   /* ---------------------------------------------------------------------- */
 
-  var TABS = ["tracks", "texts", "images", "settings"];
+  var TABS = ["tracks", "texts", "images", "settings", "duels"];
 
   function selectTab(name) {
     TABS.forEach(function (tab) {
+      if (!$("tab-" + tab) || !$(tab + "-view")) return;
       $("tab-" + tab).setAttribute("aria-selected", String(tab === name));
       $(tab + "-view").hidden = tab !== name;
     });
   }
+
+  /* Outils partagés avec admin/duels.js (onglet « Votes »). */
+  window.DPTAdmin = {
+    config: CONFIG,
+    state: state,
+    getFile: getFile,
+    putFile: putFile,
+    readJSON: readJSON,
+    writeJSON: writeJSON,
+    explain: explain,
+    flash: flash,
+    setBusy: setBusy,
+    selectTab: selectTab,
+    openDialog: openDialog,
+    closeDialog: closeDialog,
+    processCover: processCover,
+    slugify: slugify
+  };
 
   /* Toute erreur inattendue s'affiche en haut de la page plutôt que de bloquer l'admin en silence. */
   function showUnexpected(err) {

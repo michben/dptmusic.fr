@@ -1,0 +1,57 @@
+# Met en ligne (ou met à jour) le service des votes sur Cloudflare :
+# pouces haut / bas des morceaux et duels « Quelle version tu préfères ? ».
+#
+# À lancer une première fois après avoir ajouté les secrets CLOUDFLARE_API_TOKEN
+# et CLOUDFLARE_ACCOUNT_ID (voir README.md, rubrique « Votes ») :
+# onglet Actions → « Déployer les votes » → Run workflow.
+# Ensuite elle se relance toute seule quand le dossier worker/ change.
+
+name: Déployer les votes
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - worker/**
+      - scripts/deploy-votes.mjs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-votes
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Déploiement sur Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/deploy-votes.mjs
+
+      - name: Publication des réglages sur le site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git checkout -- worker/wrangler.toml
+          git add assets/data/site.json
+          if git diff --cached --quiet; then
+            echo "Réglages déjà à jour."
+            exit 0
+          fi
+          git commit -m "Votes : adresse du service et clé du captcha"
+          for i in 1 2 3; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME" && break
+            sleep 3
+          done
