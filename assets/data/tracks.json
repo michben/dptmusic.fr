@@ -1,5 +1,27 @@
 [
   {
+    "id": "blcs26",
+    "title": "Blcs26",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/blcs26.jpg?v=mvpba9es",
+    "mainLink": "https://ditto.fm/blcs26",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/0exHUaKU1iqqaDPIKVTif2",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=PdQgKLu6wmY",
+      "deezer": "https://www.deezer.com/track/4342533592",
+      "tidal": "https://www.tidal.com/track/569135901",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/blcs26",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HMS2G7BP/",
+      "anghami": "https://play.anghami.com/song/1307193680",
+      "youtubeMusic": "https://music.youtube.com/watch?v=PdQgKLu6wmY",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/KtHfqEQ1IXgP0_fruE",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/439495789/"
+    }
+  },
+  {
     "id": "bloc20us26",
     "title": "bloc20Us26",
     "artist": "DPT",

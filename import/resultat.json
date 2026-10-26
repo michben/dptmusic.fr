@@ -1,10 +1,10 @@
 {
-  "requestId": "mvpb8bt1-yw5tag",
-  "url": "https://ditto.fm/bloc20us26",
+  "requestId": "mvpb9zgr-ah6d18",
+  "url": "https://ditto.fm/blcs26",
   "status": "ok",
-  "message": "« bloc20Us26 » a été ajoutée avec 10 plateformes.",
-  "trackId": "bloc20us26",
-  "title": "bloc20Us26",
+  "message": "« Blcs26 » a été ajoutée avec 10 plateformes.",
+  "trackId": "blcs26",
+  "title": "Blcs26",
   "platforms": [
     "spotify",
     "youtube",
@@ -17,5 +17,5 @@
     "kkbox",
     "iheart"
   ],
-  "finishedAt": "2026-10-26T13:46:34.194Z"
+  "finishedAt": "2026-10-26T13:47:51.460Z"
 }
