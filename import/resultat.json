@@ -1,10 +1,10 @@
 {
-  "requestId": "mvpbaur0-xmvdex",
-  "url": "https://ditto.fm/dans-mes-os",
+  "requestId": "mvpbbj0b-1t3sv3",
+  "url": "https://ditto.fm/ou-est-tu",
   "status": "ok",
-  "message": "« Dans mes os » a été ajoutée avec 10 plateformes.",
-  "trackId": "dans-mes-os",
-  "title": "Dans mes os",
+  "message": "« ou est tu ? » a été ajoutée avec 10 plateformes.",
+  "trackId": "ou-est-tu",
+  "title": "ou est tu ?",
   "platforms": [
     "spotify",
     "youtube",
@@ -17,5 +17,5 @@
     "kkbox",
     "iheart"
   ],
-  "finishedAt": "2026-10-26T13:48:32.234Z"
+  "finishedAt": "2026-10-26T13:49:01.579Z"
 }

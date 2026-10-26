@@ -1,5 +1,27 @@
 [
   {
+    "id": "ou-est-tu",
+    "title": "ou est tu ?",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/ou-est-tu.jpg?v=mvpbbrii",
+    "mainLink": "https://ditto.fm/ou-est-tu",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/6svOHNseFjLjaf6RgBwMQ6",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=EAxeZo_BeWU",
+      "deezer": "https://www.deezer.com/track/4350671542",
+      "tidal": "https://www.tidal.com/track/570215936",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/ou-est-tu",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HN5NRV1R/",
+      "anghami": "https://play.anghami.com/song/1307918108",
+      "youtubeMusic": "https://music.youtube.com/watch?v=EAxeZo_BeWU",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/DYroY0q7ri5YRnBqvs",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/440426341/"
+    }
+  },
+  {
     "id": "dans-mes-os",
     "title": "Dans mes os",
     "artist": "DPT",
