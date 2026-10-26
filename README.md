@@ -19,6 +19,7 @@ Toutes les modifications courantes (ajouter un morceau, changer un lien, mettre 
 dptmusic.fr/
 ├── index.html              Accueil
 ├── music.html              Discographie (générée depuis tracks.json)
+├── vote.html               Votes « Quelle version tu préfères ? » (depuis duels.json)
 ├── about.html              À propos (textes à compléter)
 ├── contact.html            Contact
 ├── mentions-legales.html   Mentions légales (à compléter)
@@ -34,7 +35,9 @@ dptmusic.fr/
 │   │   └── covers/         Pochettes des morceaux
 │   └── data/
 │       ├── tracks.json     Morceaux
+│       ├── duels.json      Votes entre deux versions (onglet « Votes » de l’admin)
 │       └── site.json       Paramètres du site
+├── worker/                 Service des votes (Cloudflare), voir « Votes du public »
 ├── CNAME                   Domaine personnalisé (dptmusic.fr)
 ├── .nojekyll               Indique à GitHub Pages de servir les fichiers tels quels
 ├── robots.txt
@@ -78,6 +81,44 @@ Dans l’admin (`/admin/`), collez le lien ditto.fm de la sortie (ex. `https://d
 Rien n’est inventé : ce qui n’est pas sur la page reste vide. Le type est mis à `Single` par défaut et la date reste vide si ditto.fm ne l’affiche pas : corrigez-les avec **Modifier** si besoin. Réimporter un lien déjà présent met la sortie à jour (utile quand de nouvelles plateformes s’ajoutent après la sortie).
 
 Comment ça marche : un navigateur n’a pas le droit de lire ditto.fm, donc l’admin dépose le lien dans `import/demande.json` et une GitHub Action (`.github/workflows/import-ditto.yml`, script `scripts/import-ditto.mjs`) lit la page et publie le résultat. On peut aussi la lancer depuis GitHub : onglet **Actions** → **Importer un lien ditto.fm** → **Run workflow**. Le compte rendu du dernier import est dans `import/resultat.json`.
+
+## Votes du public : pouces et « Quelle version tu préfères ? »
+
+Deux fonctions de vote, gratuites, qui ne demandent aucun serveur à gérer :
+
+- **Pouces 👍 / 👎 sous chaque morceau** (accueil et page Musique) : sans inscription. Un captcha Cloudflare Turnstile, invisible la plupart du temps, bloque les robots. Un même navigateur a une voix par morceau (recliquer annule le vote).
+- **Page « Vote »** (`vote.html`) : vous proposez deux versions d’un morceau, le public **inscrit** (pseudo, e-mail, mot de passe) vote pour sa préférée, voit les **résultats en direct** (rafraîchis toutes les 10 secondes) et un **compte à rebours** jusqu’à la fin. À la fin, la page annonce la version gagnante, celle qui sortira. Chacun peut changer d’avis tant que le vote est ouvert.
+
+Les votes se gèrent dans l’admin, onglet **Votes** : titre, petit texte, image, date de fin (une semaine par défaut), et pour chaque version un nom et un fichier audio (MP3, 20 Mo maximum, enregistré dans `assets/audio/`) ou un lien d’écoute (par exemple un lien SoundCloud privé). Les résultats s’affichent aussi dans l’admin. Les votes sont dans `assets/data/duels.json`.
+
+### Comment ça marche
+
+Un site GitHub Pages ne peut pas enregistrer de votes. Ils sont donc comptés par un petit service, `dpt-votes`, hébergé gratuitement chez **Cloudflare** (Workers + base de données D1, dossier `worker/`). L’offre gratuite (100 000 requêtes et 100 000 écritures par jour) suffit très largement. Les adresses IP ne sont jamais enregistrées en clair (seulement une empreinte, pour limiter les abus), et les mots de passe sont chiffrés.
+
+### Mise en route (une seule fois, environ 10 minutes)
+
+1. **Créez un compte Cloudflare gratuit** sur https://dash.cloudflare.com/sign-up (aucune carte bancaire). Votre domaine n’a pas besoin d’être chez Cloudflare.
+2. **Ouvrez « Workers & Pages »** dans le menu de gauche une première fois (cela active les Workers sur le compte).
+3. **Notez votre identifiant de compte (Account ID)** : sur la page d’accueil du tableau de bord, menu « ⋯ » à côté du nom du compte → *Copy account ID* (ou dans l’adresse de la page : `dash.cloudflare.com/<Account ID>/…`).
+4. **Créez un jeton d’API** : https://dash.cloudflare.com/profile/api-tokens → *Create Token* → modèle **« Edit Cloudflare Workers »** → *Use template*. Dans **Permissions**, ajoutez deux lignes avec *+ Add more* :
+   - *Account* → **D1** → *Edit*
+   - *Account* → **Turnstile** → *Edit*
+
+   Dans *Account Resources*, choisissez votre compte. *Continue to summary* → *Create Token*, puis copiez le jeton (il ne s’affiche qu’une fois).
+5. **Ajoutez les deux secrets dans GitHub** : dépôt `michben/dptmusic.fr` → *Settings* → *Secrets and variables* → *Actions* → *New repository secret* :
+   - `CLOUDFLARE_API_TOKEN` : le jeton de l’étape 4 ;
+   - `CLOUDFLARE_ACCOUNT_ID` : l’identifiant de l’étape 3.
+6. **Lancez l’installation** : onglet *Actions* → **Déployer les votes** → *Run workflow*. En 1 à 2 minutes, l’action crée le captcha, la base de données et le service, puis écrit son adresse dans `assets/data/site.json` (rubrique `votes`). Les pouces et la page Vote fonctionnent dès que le site est à jour.
+
+Ensuite, il n’y a plus rien à faire : l’action se relance seule si le dossier `worker/` change. Si elle échoue, le message en rouge dans l’onglet *Actions* dit quoi corriger (le plus souvent : une permission oubliée sur le jeton de l’étape 4).
+
+### Bon à savoir
+
+- Pas d’e-mail de confirmation à l’inscription : l’anti-robot et une limite de 5 inscriptions par connexion et par jour freinent les faux comptes. Un mot de passe oublié se règle en créant un nouveau compte.
+- Pour supprimer un vote ou un compte à la demande d’un fan, ou pour lire les chiffres bruts : tableau de bord Cloudflare → *Storage & Databases* → *D1* → `dpt-votes` → *Console*.
+- Supprimer un vote dans l’admin le retire du site ; les voix restent dans la base mais ne sont plus affichées.
+
+---
 
 ## Ajouter un nouveau morceau à la main
 

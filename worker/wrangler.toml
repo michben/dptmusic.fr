@@ -1,0 +1,20 @@
+# Service des votes de dptmusic.fr (Cloudflare Workers + D1).
+# Déployé automatiquement par la GitHub Action « Déployer les votes »
+# (.github/workflows/deploy-votes.yml) : rien à modifier ici à la main.
+
+name = "dpt-votes"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
+
+[vars]
+# Adresse du site : sert à lire la liste des morceaux et des duels.
+SITE_URL = "https://dptmusic.fr"
+# Sites autorisés à envoyer des votes (séparés par des virgules).
+ALLOWED_ORIGINS = "https://dptmusic.fr,https://www.dptmusic.fr,http://localhost:8000"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dpt-votes"
+# Remplacé automatiquement au déploiement par l'identifiant de la base.
+database_id = "00000000-0000-0000-0000-000000000000"

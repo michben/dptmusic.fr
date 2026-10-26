@@ -120,3 +120,11 @@ code { padding: .1rem .35rem; background: var(--bg-raised); border-radius: 4px; 
 
 .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .75rem; }
 .admin-intro { margin: 0; }
+
+/* Onglet « Votes » (admin/duels.js) */
+.admin-notice { margin: 0 0 1.5rem; padding: 1rem 1.25rem; }
+.admin-item-info .duel-results { display: block; margin-top: .2rem; color: var(--text); }
+.version-field { display: grid; gap: .75rem; padding: 1rem 0; border-top: 1px solid var(--line); }
+.version-field:first-of-type { border-top: 0; padding-top: .25rem; }
+.version-field h3 { margin: 0; font-size: 1.1rem; }
+.version-field audio { width: 100%; }
