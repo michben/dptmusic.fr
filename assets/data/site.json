@@ -18,7 +18,7 @@
   "images": {
     "artist": "assets/img/artist.jpg?v=mvpef2cf",
     "logo": "assets/img/logo.png",
-    "about": "",
+    "about": "assets/img/about.jpg?v=mvpefajn",
     "icon": ""
   },
   "_aide_about": "Textes de la page « À propos ». Laissez une ligne vide entre deux paragraphes : chaque paragraphe s'affiche séparément. Un texte vide masque le bloc.",
