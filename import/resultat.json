@@ -1,10 +1,10 @@
 {
-  "requestId": "mvpb9zgr-ah6d18",
-  "url": "https://ditto.fm/blcs26",
+  "requestId": "mvpbahmj-y79fj8",
+  "url": "https://ditto.fm/je-me-choisis-dpt",
   "status": "ok",
-  "message": "« Blcs26 » a été ajoutée avec 10 plateformes.",
-  "trackId": "blcs26",
-  "title": "Blcs26",
+  "message": "« Je Me Choisis » a été ajoutée avec 10 plateformes.",
+  "trackId": "je-me-choisis",
+  "title": "Je Me Choisis",
   "platforms": [
     "spotify",
     "youtube",
@@ -17,5 +17,5 @@
     "kkbox",
     "iheart"
   ],
-  "finishedAt": "2026-10-26T13:47:51.460Z"
+  "finishedAt": "2026-10-26T13:48:12.868Z"
 }

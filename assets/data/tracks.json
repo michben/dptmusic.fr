@@ -1,5 +1,27 @@
 [
   {
+    "id": "je-me-choisis",
+    "title": "Je Me Choisis",
+    "artist": "DPT",
+    "releaseDate": "",
+    "type": "Single",
+    "cover": "assets/img/covers/je-me-choisis.jpg?v=mvpbapxg",
+    "mainLink": "https://ditto.fm/je-me-choisis-dpt",
+    "platforms": {
+      "spotify": "https://open.spotify.com/track/01WSalswBrmCOkWSNK8404",
+      "appleMusic": "",
+      "youtube": "https://www.youtube.com/watch?v=b4mtkG26Bxs",
+      "deezer": "https://www.deezer.com/track/4349911962",
+      "tidal": "https://www.tidal.com/track/570126485",
+      "soundcloud": "https://soundcloud.com/dpt-scmusic/je-me-choisis",
+      "amazonMusic": "https://music.amazon.com/tracks/B0HN5GVFXZ/",
+      "anghami": "https://play.anghami.com/song/1307855362",
+      "youtubeMusic": "https://music.youtube.com/watch?v=b4mtkG26Bxs",
+      "kkbox": "https://www.kkbox.com/tw/tc/song/0stv7NZCDz1b9iU2Tc",
+      "iheart": "https://www.iheart.com/artist/52612351/songs/440353161/"
+    }
+  },
+  {
     "id": "blcs26",
     "title": "Blcs26",
     "artist": "DPT",
