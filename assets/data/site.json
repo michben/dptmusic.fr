@@ -16,7 +16,7 @@
   },
   "_aide_images": "Photo officielle, logo, photo de la page « À propos » (vide = photo officielle) et icône du site. L'admin remplace les fichiers et ajoute ?v=… pour que les visiteurs voient tout de suite la nouvelle image.",
   "images": {
-    "artist": "assets/img/artist.jpg",
+    "artist": "assets/img/artist.jpg?v=mvpef2cf",
     "logo": "assets/img/logo.png",
     "about": "",
     "icon": ""
